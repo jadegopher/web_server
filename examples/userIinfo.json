@@ -1,0 +1,17 @@
+{
+  "element": {
+    "profileFirstName": "Test",
+    "profileLastName": "TestLast",
+    "profileScreenName": "id",
+    "profilePicture": null,
+    "profileBackgroundPicture": null,
+    "profileTasks": null,
+    "profileRegDate": {
+      "unixTime": 0,
+      "day": 0,
+      "month": 0,
+      "year": 0
+    }
+  },
+  "errorMessage": "nil"
+}
