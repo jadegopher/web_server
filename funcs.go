@@ -10,17 +10,7 @@ import (
 
 func ToAnswer(element interface{}, err error) *entities.Answer {
 	if err != nil {
-		args := strings.Split(err.Error(), " ")
-		var num = 0
-		var tmp = err.Error()
-		if len(args) > 0 {
-			tmp = strings.Join(args[1:], " ")
-			num, err = strconv.Atoi(args[0])
-			if err != nil {
-				num = 0
-				tmp = strings.Join(args, " ")
-			}
-		}
+		tmp, num := ParseError(err)
 		return &entities.Answer{
 			Error: &entities.Error{
 				Code:  num,
@@ -30,6 +20,21 @@ func ToAnswer(element interface{}, err error) *entities.Answer {
 	return &entities.Answer{
 		Element: element,
 	}
+}
+
+func ParseError(err error) (string, int) {
+	args := strings.Split(err.Error(), " ")
+	var num = 0
+	var tmp = err.Error()
+	if len(args) > 0 {
+		tmp = strings.Join(args[1:], " ")
+		num, err = strconv.Atoi(args[0])
+		if err != nil {
+			num = 0
+			tmp = strings.Join(args, " ")
+		}
+	}
+	return tmp, num
 }
 
 func getSessionId(id string) string {
