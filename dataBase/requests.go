@@ -16,7 +16,7 @@ type DataBase struct {
 
 type DBConfig struct {
 	Username string `json:"username"`
-	Password string `json:"password"`
+	Password string `json:"passwordField"`
 	DbName   string `json:"dbName"`
 	Ip       string `json:"ip"`
 	Port     int    `json:"port"`
@@ -24,7 +24,7 @@ type DBConfig struct {
 
 func NewDataBase(config *DBConfig) (*DataBase, error) {
 	sqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
+		"passwordField=%s dbname=%s sslmode=disable",
 		config.Ip, config.Port, config.Username, config.Password, config.DbName)
 	conn, err := sql.Open("postgres", sqlInfo)
 	if err != nil {
@@ -57,9 +57,9 @@ func (db *DataBase) AddUser(userInfo *entities.Registration) error {
 	return nil
 }
 
-//TODO return userId
+//TODO return userIdField
 func (db *DataBase) Login(private *entities.UserPrivate) error {
-	result, err := db.Connection.Exec("SELECT * FROM user_private WHERE (user_id = $1 OR email = $2) AND password = $3",
+	result, err := db.Connection.Exec("SELECT * FROM user_private WHERE (user_id = $1 OR emailField = $2) AND passwordField = $3",
 		private.UserId, private.Email, private.Password)
 	if err != nil {
 		return err
@@ -116,28 +116,28 @@ func (db *DataBase) validateUserInfo(userInfo *entities.Registration) error {
 		return WrongSymbolsError
 	}
 	if len(userInfo.UserId) > 256 {
-		return db.errorConstructLong(FieldTooLongError, "256", userId)
+		return db.errorConstructLong(FieldTooLongError, "256", userIdField)
 	}
 	if len(userInfo.Email) > 256 {
-		return db.errorConstructLong(FieldTooLongError, "256", email)
+		return db.errorConstructLong(FieldTooLongError, "256", emailField)
 	}
 	if len(userInfo.Password) > 256 {
-		return db.errorConstructLong(FieldTooLongError, "256", password)
+		return db.errorConstructLong(FieldTooLongError, "256", passwordField)
 	}
 	if len(userInfo.FirstName) > 256 {
-		return db.errorConstructLong(FieldTooLongError, "256", firstName)
+		return db.errorConstructLong(FieldTooLongError, "256", firstNameField)
 	}
 	if len(userInfo.LastName) > 256 {
-		return db.errorConstructLong(FieldTooLongError, "256", lastName)
+		return db.errorConstructLong(FieldTooLongError, "256", lastNameField)
 	}
 	if userInfo.Gender != male && userInfo.Gender != female && userInfo.Gender != another {
 		return db.errorConstructValue(WrongValueError, "gender", male, female, another)
 	}
 	if len(userInfo.Picture) > 512 {
-		return db.errorConstructLong(FieldTooLongError, "512", picture)
+		return db.errorConstructLong(FieldTooLongError, "512", pictureField)
 	}
 	if len(userInfo.BackgroundPicture) > 512 {
-		return db.errorConstructLong(FieldTooLongError, "512", backgroundPicture)
+		return db.errorConstructLong(FieldTooLongError, "512", bgPictureField)
 	}
 	result, err := db.Connection.Exec("SELECT user_id FROM user_private WHERE user_id = $1", userInfo.UserId)
 	if err != nil {
@@ -147,7 +147,7 @@ func (db *DataBase) validateUserInfo(userInfo *entities.Registration) error {
 	if err != nil || rowsAffected == 1 {
 		return NicknameUniqueError
 	}
-	result, err = db.Connection.Exec("SELECT email FROM user_private WHERE email = $1", userInfo.Email)
+	result, err = db.Connection.Exec("SELECT emailField FROM user_private WHERE emailField = $1", userInfo.Email)
 	if err != nil {
 		return err
 	}
