@@ -67,7 +67,7 @@ func (handler *Handlers) loginHelper(w http.ResponseWriter, r *http.Request) err
 	if err = handler.DataBase.Login(userInfo); err != nil {
 		return err
 	}
-	w.Header().Set("sessionId", getSessionId(userInfo.UserId))
+	w.Header().Set(sessionIdField, getSessionId(userInfo.UserId))
 	if err := json.NewEncoder(w).Encode(ToAnswer(success, err)); err != nil {
 		return err
 	}
@@ -91,8 +91,8 @@ func (handler *Handlers) getUserInfoHelper(w http.ResponseWriter, r *http.Reques
 }
 
 func (handler *Handlers) validateSession(r *http.Request) error {
-	sessionId := r.Header.Get("sessionId")
-	userId := r.Header.Get("userId")
+	sessionId := r.Header.Get(sessionIdField)
+	userId := r.Header.Get(userIdField)
 	_, err := handler.DataBase.GetUserInfo(userId)
 	if err != nil {
 		return err

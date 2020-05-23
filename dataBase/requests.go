@@ -49,6 +49,7 @@ func (db *DataBase) AddUser(userInfo *entities.Registration) error {
 	return nil
 }
 
+//TODO return userId
 func (db *DataBase) Login(private *entities.UserPrivate) error {
 	result, err := db.Connection.Exec("SELECT * FROM user_private WHERE (user_id = $1 OR email = $2) AND password = $3",
 		private.UserId, private.Email, private.Password)
