@@ -22,7 +22,7 @@ func (handler *Handlers) registrationHelper(w http.ResponseWriter, r *http.Reque
 	if err = handler.DataBase.AddUser(userInfo); err != nil {
 		return err
 	}
-	if err := json.NewEncoder(w).Encode(ToAnswer(success, nil)); err != nil {
+	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
 		return err
 	}
 	return nil
@@ -41,7 +41,7 @@ func (handler *Handlers) loginHelper(w http.ResponseWriter, r *http.Request) err
 		return err
 	}
 	w.Header().Set(sessionIdField, getSessionId(userInfo.UserId))
-	if err := json.NewEncoder(w).Encode(ToAnswer(success, nil)); err != nil {
+	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
 		return err
 	}
 	return nil
@@ -57,7 +57,7 @@ func (handler *Handlers) getUserInfoHelper(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		return err
 	}
-	if err := json.NewEncoder(w).Encode(ToAnswer(&user, nil)); err != nil {
+	if err := json.NewEncoder(w).Encode(toAnswer(&user, nil)); err != nil {
 		return err
 	}
 	return nil
@@ -77,7 +77,7 @@ func (handler *Handlers) validateSession(r *http.Request) error {
 }
 
 func (handler *Handlers) defaultErrorResponse(w http.ResponseWriter, err error) {
-	data, err := json.Marshal(ToAnswer(nil, err))
+	data, err := json.Marshal(toAnswer(nil, err))
 	if err != nil {
 		http.Error(w, "", http.StatusBadRequest)
 	}

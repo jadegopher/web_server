@@ -14,10 +14,18 @@ type DataBase struct {
 	Connection *sql.DB
 }
 
-func NewDataBase(username, password, dbName, ip string, port int) (*DataBase, error) {
+type DBConfig struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	DbName   string `json:"dbName"`
+	Ip       string `json:"ip"`
+	Port     int    `json:"port"`
+}
+
+func NewDataBase(config *DBConfig) (*DataBase, error) {
 	sqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
-		ip, port, username, password, dbName)
+		config.Ip, config.Port, config.Username, config.Password, config.DbName)
 	conn, err := sql.Open("postgres", sqlInfo)
 	if err != nil {
 		return nil, err

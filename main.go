@@ -8,11 +8,15 @@ import (
 )
 
 func main() {
-	router := mux.NewRouter()
-	db, err := dataBase.NewDataBase("postgres", "admin", "meet_and_go", "35.228.190.27", 5432)
+	config, err := getConfig("config.json")
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+	db, err := dataBase.NewDataBase(config["dataBase"].(*dataBase.DBConfig))
 	if err != nil {
 		log.Fatalf("DataBase error")
 	}
+	router := mux.NewRouter()
 	handlers := NewHandlers(db)
 	router.HandleFunc("/registration", handlers.Registration).Methods("POST")
 	router.HandleFunc("/login", handlers.Login).Methods("POST")

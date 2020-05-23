@@ -1,0 +1,9 @@
+{
+  "dataBase": {
+    "username": "postgres",
+    "password": "admin",
+    "dbName": "meet_and_go",
+    "ip": "35.228.190.27",
+    "port": 5432
+  }
+}
