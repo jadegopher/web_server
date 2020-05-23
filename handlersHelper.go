@@ -77,7 +77,9 @@ func (handler *Handlers) validateSession(r *http.Request) error {
 }
 
 func (handler *Handlers) defaultErrorResponse(w http.ResponseWriter, err error) {
-	msg, _ := ParseError(err)
-	http.Error(w, msg, http.StatusBadRequest)
-	_ = json.NewEncoder(w).Encode(ToAnswer(nil, err))
+	data, err := json.Marshal(ToAnswer(nil, err))
+	if err != nil {
+		http.Error(w, "", http.StatusBadRequest)
+	}
+	http.Error(w, string(data), http.StatusBadRequest)
 }
