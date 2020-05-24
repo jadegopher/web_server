@@ -4,6 +4,8 @@ const (
 	success        = "success"
 	secret         = "ibksizi"
 	sessionIdField = "sessionId"
+	dataBaseField  = "dataBase"
+	logField       = "log"
 	userIdField    = "userId"
 	emailField     = "email"
 	passwordField  = "password"

@@ -4,6 +4,8 @@
     "password": "superSecretPassword1332!!saw",
     "dbName": "meet_and_go",
     "ip": "35.228.190.27",
-    "port": 5432
-  }
+    "port": 5432,
+    "reInitDataBase": false
+  },
+  "log": true
 }
