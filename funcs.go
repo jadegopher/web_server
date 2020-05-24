@@ -23,7 +23,8 @@ func getConfig(path string) (map[string]interface{}, error) {
 	}
 	ret := make(map[string]interface{})
 	tmp := &dataBase.DBConfig{}
-	ret["dataBase"], err = getModule(cfg["dataBase"], tmp)
+	ret[dataBaseField], err = getModule(cfg[dataBaseField], tmp)
+	ret[logField] = cfg[logField]
 	return ret, nil
 }
 

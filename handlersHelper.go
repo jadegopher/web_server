@@ -135,3 +135,7 @@ func (handler *Handlers) validateRegFields(userInfo *entities.Registration) erro
 func (handler *Handlers) errorConstructField(err error, add string) error {
 	return errors.New(err.Error() + "'" + add + "' " + "doesn't exist")
 }
+
+func (handler *Handlers) addLog(r *http.Request, reqName string, err error) {
+
+}
