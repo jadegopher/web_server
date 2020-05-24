@@ -3,25 +3,17 @@ package dataBase
 import (
 	"database/sql"
 	"errors"
-	"regexp"
 	"time"
 	"web_server/entities"
 )
-
-type Log struct {
-	Time    string
-	Request string
-	Error   string
-	Body    string
-	Query   string
-	Headers string
-}
 
 func (db *DataBase) createNewDataBase() error {
 	_, err := db.Connection.Exec(`
 		DROP TABLE IF EXISTS log;
 		DROP TABLE IF EXISTS user_info;
+		DROP TABLE IF EXISTS developers;
 		DROP TABLE IF EXISTS user_private;
+		DROP TABLE IF EXISTS tags;
 		CREATE TABLE log(
   			time        VARCHAR(256) NOT NULL,
     		request     VARCHAR(256) NOT NULL,
@@ -36,9 +28,15 @@ func (db *DataBase) createNewDataBase() error {
     		email    VARCHAR(256) NOT NULL UNIQUE,
     		password VARCHAR(256) NOT NULL
 		);
+		CREATE TABLE developers
+		(
+		    user_id VARCHAR(256) NOT NULL,
+		    PRIMARY KEY (user_id),
+    		FOREIGN KEY (user_id) REFERENCES user_private (user_id)
+		);
 		CREATE TABLE user_info
 		(
-    		user_id            VARCHAR(256) NOT NULL,
+    		user_id            VARCHAR(256) NOT NULL UNIQUE,
     		first_name         VARCHAR(256) NOT NULL,
     		last_name          VARCHAR(256) NOT NULL,
     		registration_time  VARCHAR(256) NOT NULL,
@@ -48,6 +46,10 @@ func (db *DataBase) createNewDataBase() error {
     		background_picture VARCHAR(512),
     		PRIMARY KEY (user_id),
     		FOREIGN KEY (user_id) REFERENCES user_private (user_id)
+		);
+		CREATE TABLE tags (
+  			tag_name VARCHAR (50) NOT NULL UNIQUE,
+  			description VARCHAR (256)         
 		);`)
 	if err != nil {
 		return err
@@ -63,54 +65,6 @@ func (db *DataBase) append(query string, args ...interface{}) error {
 	rowsAffected, err := result.RowsAffected()
 	if err != nil || rowsAffected != 1 {
 		return err
-	}
-	return nil
-}
-
-func (db *DataBase) validateUserInfo(userInfo *entities.Registration) error {
-	r := regexp.MustCompile(nickReg)
-	if !r.MatchString(userInfo.UserId) {
-		return WrongSymbolsError
-	}
-	if len(userInfo.UserId) > 256 {
-		return db.errorConstructLong(FieldTooLongError, "256", userIdField)
-	}
-	if len(userInfo.Email) > 256 {
-		return db.errorConstructLong(FieldTooLongError, "256", emailField)
-	}
-	if len(userInfo.Password) > 256 {
-		return db.errorConstructLong(FieldTooLongError, "256", passwordField)
-	}
-	if len(userInfo.FirstName) > 256 {
-		return db.errorConstructLong(FieldTooLongError, "256", firstNameField)
-	}
-	if len(userInfo.LastName) > 256 {
-		return db.errorConstructLong(FieldTooLongError, "256", lastNameField)
-	}
-	if userInfo.Gender != male && userInfo.Gender != female && userInfo.Gender != another {
-		return db.errorConstructValue(WrongValueError, "gender", male, female, another)
-	}
-	if len(userInfo.Picture) > 512 {
-		return db.errorConstructLong(FieldTooLongError, "512", pictureField)
-	}
-	if len(userInfo.BackgroundPicture) > 512 {
-		return db.errorConstructLong(FieldTooLongError, "512", bgPictureField)
-	}
-	result, err := db.Connection.Exec("SELECT user_id FROM user_private WHERE user_id = $1", userInfo.UserId)
-	if err != nil {
-		return err
-	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil || rowsAffected == 1 {
-		return NicknameUniqueError
-	}
-	result, err = db.Connection.Exec("SELECT email FROM user_private WHERE email = $1", userInfo.Email)
-	if err != nil {
-		return err
-	}
-	rowsAffected, err = result.RowsAffected()
-	if err != nil || rowsAffected == 1 {
-		return EmailUniqueError
 	}
 	return nil
 }

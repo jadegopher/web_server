@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
+	"regexp"
 	"time"
 	"web_server/entities"
 )
@@ -117,11 +118,105 @@ func (db *DataBase) SearchUser(query, from, count string) ([]entities.UserInfo, 
 	return ret, nil
 }
 
-func (db *DataBase) LogAdd(logInfo *Log) error {
+func (db *DataBase) LogAdd(logInfo *entities.Log) error {
 	if err := db.append("INSERT INTO log VALUES($1, $2, $3, $4, $5, $6)",
 		logInfo.Time, logInfo.Request, logInfo.Error, logInfo.Body, logInfo.Query,
 		logInfo.Headers); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (db *DataBase) AddDeveloper(userId string) error {
+	if err := db.append("INSERT into developers VALUES($1)", userId); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DataBase) CheckDeveloper(userId string) error {
+	result, err := db.Connection.Query("SELECT * FROM developers WHERE user_id = $1", userId)
+	if err != nil {
+		return err
+	}
+	if !result.Next() {
+		return UserNotFoundError
+	}
+	return nil
+}
+
+func (db *DataBase) AddTag(tag *entities.Tag) error {
+	if err := db.validateTag(tag); err != nil {
+		return err
+	}
+	if err := db.append("INSERT into tags VALUES($1, $2)", tag.Name, tag.Description); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DataBase) validateUserInfo(userInfo *entities.Registration) error {
+	r := regexp.MustCompile(nickReg)
+	if !r.MatchString(userInfo.UserId) {
+		return WrongSymbolsError
+	}
+	if len(userInfo.UserId) > 256 {
+		return db.errorConstructLong(FieldTooLongError, "256", userIdField)
+	}
+	if len(userInfo.Email) > 256 {
+		return db.errorConstructLong(FieldTooLongError, "256", emailField)
+	}
+	if len(userInfo.Password) > 256 {
+		return db.errorConstructLong(FieldTooLongError, "256", passwordField)
+	}
+	if len(userInfo.FirstName) > 256 {
+		return db.errorConstructLong(FieldTooLongError, "256", firstNameField)
+	}
+	if len(userInfo.LastName) > 256 {
+		return db.errorConstructLong(FieldTooLongError, "256", lastNameField)
+	}
+	if userInfo.Gender != male && userInfo.Gender != female && userInfo.Gender != another {
+		return db.errorConstructValue(WrongValueError, "gender", male, female, another)
+	}
+	if len(userInfo.Picture) > 512 {
+		return db.errorConstructLong(FieldTooLongError, "512", pictureField)
+	}
+	if len(userInfo.BackgroundPicture) > 512 {
+		return db.errorConstructLong(FieldTooLongError, "512", bgPictureField)
+	}
+	result, err := db.Connection.Exec("SELECT user_id FROM user_private WHERE user_id = $1", userInfo.UserId)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil || rowsAffected == 1 {
+		return NicknameUniqueError
+	}
+	result, err = db.Connection.Exec("SELECT email FROM user_private WHERE email = $1", userInfo.Email)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err = result.RowsAffected()
+	if err != nil || rowsAffected == 1 {
+		return EmailUniqueError
+	}
+	return nil
+}
+
+func (db *DataBase) validateTag(tag *entities.Tag) error {
+	if len(tag.Name) > 50 {
+		return db.errorConstructLong(FieldTooLongError, "50", "tag_name")
+	}
+	if len(tag.Description) > 256 {
+		return db.errorConstructLong(FieldTooLongError, "256", "description")
+	}
+	result, err := db.Connection.Exec("SELECT tag_name FROM tags WHERE tag_name = $1", tag.Name)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil || rowsAffected == 1 {
+		return TagUniqueError
 	}
 	return nil
 }

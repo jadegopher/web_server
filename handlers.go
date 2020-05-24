@@ -53,3 +53,23 @@ func (handler *Handlers) SearchUser(w http.ResponseWriter, r *http.Request) {
 		handler.addLog(r, "SearchUser", err)
 	}
 }
+
+func (handler *Handlers) GetDeveloperAccount(w http.ResponseWriter, r *http.Request) {
+	var err error
+	if err = handler.getDeveloperAccountHelper(w, r); err != nil {
+		handler.defaultErrorResponse(w, err)
+	}
+	if handler.Log {
+		handler.addLog(r, "GetDeveloperAccount", err)
+	}
+}
+
+func (handler *Handlers) PostTag(w http.ResponseWriter, r *http.Request) {
+	var err error
+	if err = handler.postTagHelper(w, r); err != nil {
+		handler.defaultErrorResponse(w, err)
+	}
+	if handler.Log {
+		handler.addLog(r, "PostTag", err)
+	}
+}

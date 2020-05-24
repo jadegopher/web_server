@@ -10,4 +10,5 @@ var (
 	WrongValueError     = errors.New("104 wrong value for field ")
 	WrongSymbolsError   = errors.New("105 wrong symbols")
 	LoginError          = errors.New("106 login error")
+	TagUniqueError      = errors.New("107 tah with this name already exists")
 )
