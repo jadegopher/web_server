@@ -16,15 +16,14 @@ type DataBase struct {
 
 type DBConfig struct {
 	Username string `json:"username"`
-	Password string `json:"passwordField"`
+	Password string `json:"password"`
 	DbName   string `json:"dbName"`
 	Ip       string `json:"ip"`
 	Port     int    `json:"port"`
 }
 
 func NewDataBase(config *DBConfig) (*DataBase, error) {
-	sqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"passwordField=%s dbname=%s sslmode=disable",
+	sqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		config.Ip, config.Port, config.Username, config.Password, config.DbName)
 	conn, err := sql.Open("postgres", sqlInfo)
 	if err != nil {
@@ -57,19 +56,24 @@ func (db *DataBase) AddUser(userInfo *entities.Registration) error {
 	return nil
 }
 
-//TODO return userIdField
-func (db *DataBase) Login(private *entities.UserPrivate) error {
-	result, err := db.Connection.Exec("SELECT * FROM user_private WHERE (user_id = $1 OR emailField = $2) AND passwordField = $3",
-		private.UserId, private.Email, private.Password)
+func (db *DataBase) Login(private *entities.UserPrivate) (string, error) {
+	result, err := db.Connection.Query(`SELECT * 
+		FROM user_private
+ 		WHERE (user_id = $1 OR email = $2) 
+ 		AND password = $3`, private.UserId, private.Email, private.Password)
 	if err != nil {
-		return err
+		return "", err
 	}
-	rows, err := result.RowsAffected()
-	if err != nil || rows != 1 {
-		return LoginError
+	ret := &entities.UserPrivate{}
+	if result.Next() {
+		if err := result.Scan(&ret.UserId, &ret.Email, &ret.Password); err != nil {
+			return "", err
+		}
+	} else {
+		return "", LoginError
 	}
 	//TODO Update Online INfo
-	return nil
+	return ret.UserId, nil
 }
 
 func (db *DataBase) GetUserInfo(id string) (*entities.UserInfo, error) {
@@ -77,23 +81,34 @@ func (db *DataBase) GetUserInfo(id string) (*entities.UserInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	ret := &entities.UserInfo{}
-	var regTime, onlineTime string
+	var ret *entities.UserInfo
 	if result.Next() {
-		if err := result.Scan(&ret.UserId, &ret.FirstName, &ret.LastName, &regTime,
-			&ret.Gender, &onlineTime, &ret.Picture, &ret.BackgroundPicture); err != nil {
+		ret, err = db.getUserInfo(result)
+		if err != nil {
 			return nil, err
 		}
 	} else {
 		return nil, UserNotFoundError
 	}
-	ret.RegistrationTime, err = time.Parse(time.RFC1123, regTime)
+	return ret, nil
+}
+
+func (db *DataBase) SearchUser(query, from, count string) ([]entities.UserInfo, error) {
+	result, err := db.Connection.Query(`SELECT *
+		FROM user_info
+		WHERE LOWER(user_id) LIKE LOWER($1)
+		OR LOWER(first_name) LIKE LOWER($1)
+		OR LOWER(last_name) LIKE LOWER($1) LIMIT $2 OFFSET $3`, query+"%", count, from)
 	if err != nil {
 		return nil, err
 	}
-	ret.OnlineTime, err = time.Parse(time.RFC1123, onlineTime)
-	if err != nil {
-		return nil, err
+	ret := make([]entities.UserInfo, 0)
+	for result.Next() {
+		elem, err := db.getUserInfo(result)
+		if err != nil {
+			return nil, err
+		}
+		ret = append(ret, *elem)
 	}
 	return ret, nil
 }
@@ -147,7 +162,7 @@ func (db *DataBase) validateUserInfo(userInfo *entities.Registration) error {
 	if err != nil || rowsAffected == 1 {
 		return NicknameUniqueError
 	}
-	result, err = db.Connection.Exec("SELECT emailField FROM user_private WHERE emailField = $1", userInfo.Email)
+	result, err = db.Connection.Exec("SELECT email FROM user_private WHERE email = $1", userInfo.Email)
 	if err != nil {
 		return err
 	}
@@ -156,6 +171,27 @@ func (db *DataBase) validateUserInfo(userInfo *entities.Registration) error {
 		return EmailUniqueError
 	}
 	return nil
+}
+
+func (db *DataBase) getUserInfo(result *sql.Rows) (*entities.UserInfo, error) {
+	var err error
+	ret := &entities.UserInfo{}
+	var regTime, onlineTime string
+
+	if err := result.Scan(&ret.UserId, &ret.FirstName, &ret.LastName, &regTime,
+		&ret.Gender, &onlineTime, &ret.Picture, &ret.BackgroundPicture); err != nil {
+		return nil, err
+	}
+
+	ret.RegistrationTime, err = time.Parse(time.RFC1123, regTime)
+	if err != nil {
+		return nil, err
+	}
+	ret.OnlineTime, err = time.Parse(time.RFC1123, onlineTime)
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
 }
 
 func (db *DataBase) errorConstructLong(err error, size, name string) error {

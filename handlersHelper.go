@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
@@ -16,6 +17,9 @@ func (handler *Handlers) registrationHelper(w http.ResponseWriter, r *http.Reque
 	}
 	userInfo := &entities.Registration{}
 	if err = json.Unmarshal(data, userInfo); err != nil {
+		return err
+	}
+	if err = handler.validateRegFields(userInfo); err != nil {
 		return err
 	}
 	userInfo.RegistrationTime = time.Now()
@@ -37,10 +41,11 @@ func (handler *Handlers) loginHelper(w http.ResponseWriter, r *http.Request) err
 	if err = json.Unmarshal(data, userInfo); err != nil {
 		return err
 	}
-	if err = handler.DataBase.Login(userInfo); err != nil {
+	userId, err := handler.DataBase.Login(userInfo)
+	if err != nil {
 		return err
 	}
-	w.Header().Set(sessionIdField, getSessionId(userInfo.UserId))
+	w.Header().Set(sessionIdField, getSessionId(userId))
 	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
 		return err
 	}
@@ -58,6 +63,30 @@ func (handler *Handlers) getUserInfoHelper(w http.ResponseWriter, r *http.Reques
 		return err
 	}
 	if err := json.NewEncoder(w).Encode(toAnswer(&user, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (handler *Handlers) searchUserHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateSession(r); err != nil {
+		return err
+	}
+	query := r.URL.Query()
+	if _, in := query[queryField]; !in {
+		return handler.errorConstructField(fieldNotFoundError, queryField)
+	}
+	if _, in := query[fromField]; !in {
+		return handler.errorConstructField(fieldNotFoundError, fromField)
+	}
+	if _, in := query[countField]; !in {
+		return handler.errorConstructField(fieldNotFoundError, countField)
+	}
+	users, err := handler.DataBase.SearchUser(query[queryField][0], query[fromField][0], query[countField][0])
+	if err != nil {
+		return err
+	}
+	if err = json.NewEncoder(w).Encode(toAnswer(users, nil)); err != nil {
 		return err
 	}
 	return nil
@@ -82,4 +111,27 @@ func (handler *Handlers) defaultErrorResponse(w http.ResponseWriter, err error) 
 		http.Error(w, "", http.StatusBadRequest)
 	}
 	http.Error(w, string(data), http.StatusBadRequest)
+}
+
+func (handler *Handlers) validateRegFields(userInfo *entities.Registration) error {
+	if userInfo.UserId == "" {
+		return handler.errorConstructField(fieldNotFoundError, userIdField)
+	}
+	if userInfo.Email == "" {
+		return handler.errorConstructField(fieldNotFoundError, emailField)
+	}
+	if userInfo.FirstName == "" {
+		return handler.errorConstructField(fieldNotFoundError, firstNameField)
+	}
+	if userInfo.LastName == "" {
+		return handler.errorConstructField(fieldNotFoundError, lastNameField)
+	}
+	if userInfo.Password == "" {
+		return handler.errorConstructField(fieldNotFoundError, passwordField)
+	}
+	return nil
+}
+
+func (handler *Handlers) errorConstructField(err error, add string) error {
+	return errors.New(err.Error() + "'" + add + "' " + "doesn't exist")
 }

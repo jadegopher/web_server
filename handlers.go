@@ -30,3 +30,9 @@ func (handler *Handlers) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 		handler.defaultErrorResponse(w, err)
 	}
 }
+
+func (handler *Handlers) SearchUser(w http.ResponseWriter, r *http.Request) {
+	if err := handler.searchUserHelper(w, r); err != nil {
+		handler.defaultErrorResponse(w, err)
+	}
+}
