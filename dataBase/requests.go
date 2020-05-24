@@ -125,3 +125,10 @@ func (db *DataBase) LogAdd(logInfo *Log) error {
 	}
 	return nil
 }
+
+func (db *DataBase) AddDeveloper(userId string) error {
+	if err := db.append("INSERT into developers VALUES($1)", userId); err != nil {
+		return err
+	}
+	return nil
+}

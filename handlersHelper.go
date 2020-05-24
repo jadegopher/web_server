@@ -105,6 +105,23 @@ func (handler *Handlers) searchUserHelper(w http.ResponseWriter, r *http.Request
 	return nil
 }
 
+func (handler *Handlers) getDeveloperAccountHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateSession(r); err != nil {
+		return err
+	}
+	secret := r.Header.Get(developerField)
+	if secret != secretDeveloper {
+		return developerSecretError
+	}
+	if err := handler.DataBase.AddDeveloper(r.Header.Get(userIdField)); err != nil {
+		return err
+	}
+	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (handler *Handlers) validateSession(r *http.Request) error {
 	sessionId := r.Header.Get(sessionIdField)
 	userId := r.Header.Get(userIdField)
