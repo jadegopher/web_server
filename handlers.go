@@ -15,37 +15,41 @@ func NewHandlers(db *dataBase.DataBase, log bool) *Handlers {
 }
 
 func (handler *Handlers) Registration(w http.ResponseWriter, r *http.Request) {
-	if err := handler.registrationHelper(w, r); err != nil {
+	var err error
+	if err = handler.registrationHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
 	if handler.Log {
-
+		handler.addLog(r, "Registration", err)
 	}
 }
 
 func (handler *Handlers) Login(w http.ResponseWriter, r *http.Request) {
-	if err := handler.loginHelper(w, r); err != nil {
+	var err error
+	if err = handler.loginHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
 	if handler.Log {
-
+		handler.addLog(r, "Login", err)
 	}
 }
 
 func (handler *Handlers) GetUserInfo(w http.ResponseWriter, r *http.Request) {
-	if err := handler.getUserInfoHelper(w, r); err != nil {
+	var err error
+	if err = handler.getUserInfoHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
 	if handler.Log {
-
+		handler.addLog(r, "GetUserInfo", err)
 	}
 }
 
 func (handler *Handlers) SearchUser(w http.ResponseWriter, r *http.Request) {
-	if err := handler.searchUserHelper(w, r); err != nil {
+	var err error
+	if err = handler.searchUserHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
 	if handler.Log {
-
+		handler.addLog(r, "SearchUser", err)
 	}
 }

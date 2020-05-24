@@ -13,12 +13,12 @@ type DataBase struct {
 }
 
 type DBConfig struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	DbName   string `json:"dbName"`
-	Ip       string `json:"ip"`
-	Port     int    `json:"port"`
-	New      bool   `json:"new"`
+	Username       string `json:"username"`
+	Password       string `json:"password"`
+	DbName         string `json:"dbName"`
+	Ip             string `json:"ip"`
+	Port           int    `json:"port"`
+	ReInitDataBase bool   `json:"reInitDataBase"`
 }
 
 func NewDataBase(config *DBConfig) (*DataBase, error) {
@@ -35,7 +35,7 @@ func NewDataBase(config *DBConfig) (*DataBase, error) {
 	ret := &DataBase{
 		Connection: conn,
 	}
-	if config.New {
+	if config.ReInitDataBase {
 		if err = ret.createNewDataBase(); err != nil {
 			return nil, err
 		}
@@ -118,5 +118,10 @@ func (db *DataBase) SearchUser(query, from, count string) ([]entities.UserInfo, 
 }
 
 func (db *DataBase) LogAdd(logInfo *Log) error {
+	if err := db.append("INSERT INTO log VALUES($1, $2, $3, $4, $5, $6)",
+		logInfo.Time, logInfo.Request, logInfo.Error, logInfo.Body, logInfo.Query,
+		logInfo.Headers); err != nil {
+		return err
+	}
 	return nil
 }

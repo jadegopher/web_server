@@ -5,7 +5,7 @@
     "dbName": "meet_and_go",
     "ip": "35.228.190.27",
     "port": 5432,
-    "new": true
+    "reInitDataBase": false
   },
   "log": true
 }

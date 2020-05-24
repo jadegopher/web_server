@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
+	"web_server/dataBase"
 	"web_server/entities"
 )
 
@@ -15,6 +18,11 @@ func (handler *Handlers) registrationHelper(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		return err
 	}
+	err = r.Body.Close()
+	if err != nil {
+		return err
+	}
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
 	userInfo := &entities.Registration{}
 	if err = json.Unmarshal(data, userInfo); err != nil {
 		return err
@@ -37,6 +45,11 @@ func (handler *Handlers) loginHelper(w http.ResponseWriter, r *http.Request) err
 	if err != nil {
 		return err
 	}
+	err = r.Body.Close()
+	if err != nil {
+		return err
+	}
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
 	userInfo := &entities.UserPrivate{}
 	if err = json.Unmarshal(data, userInfo); err != nil {
 		return err
@@ -136,6 +149,41 @@ func (handler *Handlers) errorConstructField(err error, add string) error {
 	return errors.New(err.Error() + "'" + add + "' " + "doesn't exist")
 }
 
-func (handler *Handlers) addLog(r *http.Request, reqName string, err error) {
-
+func (handler *Handlers) addLog(r *http.Request, reqName string, userErr error) {
+	headers, err := json.Marshal(r.Header)
+	if err != nil {
+		log.Fatalf(err.Error())
+		return
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatalf(err.Error())
+		return
+	}
+	err = r.Body.Close()
+	if err != nil {
+		log.Fatalf(err.Error())
+		return
+	}
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	query, err := json.Marshal(r.URL.Query())
+	if err != nil {
+		log.Fatalf(err.Error())
+		return
+	}
+	tmp := &dataBase.Log{
+		Time:    time.Now().Format(time.RFC1123),
+		Request: reqName,
+		Error:   "",
+		Body:    string(body),
+		Query:   string(query),
+		Headers: string(headers),
+	}
+	if userErr != nil {
+		tmp.Error = userErr.Error()
+	}
+	if err = handler.DataBase.LogAdd(tmp); err != nil {
+		log.Fatal(err.Error())
+		return
+	}
 }

@@ -9,33 +9,46 @@ import (
 )
 
 type Log struct {
-	Time       string
-	Request    string
-	Status     bool
-	ClientIp   string
-	ClientName string
-	Error      string
-	Body       string
-	Query      string
-	Headers    string
+	Time    string
+	Request string
+	Error   string
+	Body    string
+	Query   string
+	Headers string
 }
 
 func (db *DataBase) createNewDataBase() error {
-	_, err := db.Connection.Exec("DROP TABLE IF EXISTS log;")
-	if err != nil {
-		return err
-	}
-	_, err = db.Connection.Exec(`CREATE TABLE log(
+	_, err := db.Connection.Exec(`
+		DROP TABLE IF EXISTS log;
+		DROP TABLE IF EXISTS user_info;
+		DROP TABLE IF EXISTS user_private;
+		CREATE TABLE log(
   			time        VARCHAR(256) NOT NULL,
     		request     VARCHAR(256) NOT NULL,
-    		status      BOOLEAN      NOT NULL,
-    		client_ip   VARCHAR(25)  NOT NULL,
-    		client_name VARCHAR(256),
     		error       text,
     		body        text,
     		query       text,
     		headers     text
-			);`)
+			);
+		CREATE TABLE user_private
+		(
+   	 		user_id  VARCHAR(256) NOT NULL UNIQUE PRIMARY KEY,
+    		email    VARCHAR(256) NOT NULL UNIQUE,
+    		password VARCHAR(256) NOT NULL
+		);
+		CREATE TABLE user_info
+		(
+    		user_id            VARCHAR(256) NOT NULL,
+    		first_name         VARCHAR(256) NOT NULL,
+    		last_name          VARCHAR(256) NOT NULL,
+    		registration_time  VARCHAR(256) NOT NULL,
+    		gender             VARCHAR(10)  NOT NULL,
+    		online_time        VARCHAR(256) NOT NULL,
+    		picture            VARCHAR(512),
+    		background_picture VARCHAR(512),
+    		PRIMARY KEY (user_id),
+    		FOREIGN KEY (user_id) REFERENCES user_private (user_id)
+		);`)
 	if err != nil {
 		return err
 	}
