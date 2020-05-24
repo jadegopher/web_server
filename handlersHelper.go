@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-	"web_server/dataBase"
 	"web_server/entities"
 )
 
@@ -122,6 +121,32 @@ func (handler *Handlers) getDeveloperAccountHelper(w http.ResponseWriter, r *htt
 	return nil
 }
 
+func (handler *Handlers) postTagHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateDeveloperSession(r); err != nil {
+		return err
+	}
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+	err = r.Body.Close()
+	if err != nil {
+		return err
+	}
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
+	tagInfo := &entities.Tag{}
+	if err = json.Unmarshal(data, tagInfo); err != nil {
+		return err
+	}
+	if err = handler.DataBase.AddTag(tagInfo); err != nil {
+		return err
+	}
+	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (handler *Handlers) validateSession(r *http.Request) error {
 	sessionId := r.Header.Get(sessionIdField)
 	userId := r.Header.Get(userIdField)
@@ -131,6 +156,16 @@ func (handler *Handlers) validateSession(r *http.Request) error {
 	}
 	if sessionId != getSessionId(userId) {
 		return invalidSessionError
+	}
+	return nil
+}
+
+func (handler *Handlers) validateDeveloperSession(r *http.Request) error {
+	if err := handler.validateSession(r); err != nil {
+		return err
+	}
+	if err := handler.DataBase.CheckDeveloper(r.Header.Get(userIdField)); err != nil {
+		return err
 	}
 	return nil
 }
@@ -188,7 +223,7 @@ func (handler *Handlers) addLog(r *http.Request, reqName string, userErr error) 
 		log.Fatalf(err.Error())
 		return
 	}
-	tmp := &dataBase.Log{
+	tmp := &entities.Log{
 		Time:    time.Now().Format(time.RFC1123),
 		Request: reqName,
 		Error:   "",

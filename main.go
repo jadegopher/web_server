@@ -25,6 +25,7 @@ func main() {
 	router.HandleFunc("/search", handlers.SearchUser).Methods("GET")
 
 	//For developers
-	router.HandleFunc("/developers/getaccount", handlers.GetDeveloperAccount).Methods("GET")
+	router.HandleFunc("/developers/getAccount", handlers.GetDeveloperAccount).Methods("GET")
+	router.HandleFunc("/developers/postTag", handlers.PostTag).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
