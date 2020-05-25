@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
@@ -165,7 +164,6 @@ func (handler *Handlers) postTaskHelper(w http.ResponseWriter, r *http.Request) 
 	if err = json.Unmarshal(data, taskInfo); err != nil {
 		return err
 	}
-	fmt.Println(taskInfo.RecommendedTime)
 	if _, err := time.Parse(taskInfo.RecommendedTime, time.Time{}.Format(time.RFC1123)); err != nil {
 		return err
 	}
