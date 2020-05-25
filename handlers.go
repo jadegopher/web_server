@@ -73,3 +73,13 @@ func (handler *Handlers) PostTag(w http.ResponseWriter, r *http.Request) {
 		handler.addLog(r, "PostTag", err)
 	}
 }
+
+func (handler *Handlers) PostTask(w http.ResponseWriter, r *http.Request) {
+	var err error
+	if err = handler.postTaskHelper(w, r); err != nil {
+		handler.defaultErrorResponse(w, err)
+	}
+	if handler.Log {
+		handler.addLog(r, "PostTask", err)
+	}
+}

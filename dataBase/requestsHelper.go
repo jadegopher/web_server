@@ -14,6 +14,7 @@ func (db *DataBase) createNewDataBase() error {
 		DROP TABLE IF EXISTS developers;
 		DROP TABLE IF EXISTS user_private;
 		DROP TABLE IF EXISTS tags;
+		DROP TABLE IF EXISTS tasks;
 		CREATE TABLE log(
   			time        VARCHAR(256) NOT NULL,
     		request     VARCHAR(256) NOT NULL,
@@ -50,6 +51,13 @@ func (db *DataBase) createNewDataBase() error {
 		CREATE TABLE tags (
   			tag_name VARCHAR (50) NOT NULL UNIQUE,
   			description VARCHAR (256)         
+		);
+		CREATE TABLE tasks (
+    		task_name          VARCHAR(50)  NOT NULL UNIQUE,
+    		description        VARCHAR(256) NOT NULL,
+    		time               VARCHAR(256) NOT NULL,
+    		picture            VARCHAR(512),
+    		background_picture VARCHAR(512)
 		);`)
 	if err != nil {
 		return err

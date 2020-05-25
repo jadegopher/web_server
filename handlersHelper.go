@@ -147,6 +147,35 @@ func (handler *Handlers) postTagHelper(w http.ResponseWriter, r *http.Request) e
 	return nil
 }
 
+func (handler *Handlers) postTaskHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateDeveloperSession(r); err != nil {
+		return err
+	}
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+	err = r.Body.Close()
+	if err != nil {
+		return err
+	}
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
+	taskInfo := &entities.Task{}
+	if err = json.Unmarshal(data, taskInfo); err != nil {
+		return err
+	}
+	if _, err := time.Parse(taskInfo.RecommendedTime, time.Time{}.Format(time.RFC1123)); err != nil {
+		return err
+	}
+	if err = handler.DataBase.AddTask(taskInfo); err != nil {
+		return err
+	}
+	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (handler *Handlers) validateSession(r *http.Request) error {
 	sessionId := r.Header.Get(sessionIdField)
 	userId := r.Header.Get(userIdField)
