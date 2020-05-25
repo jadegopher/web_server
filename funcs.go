@@ -23,7 +23,8 @@ func getConfig(path string) (map[string]interface{}, error) {
 	}
 	ret := make(map[string]interface{})
 	tmp := &dataBase.DBConfig{}
-	ret["dataBase"], err = getModule(cfg["dataBase"], tmp)
+	ret[dataBaseField], err = getModule(cfg[dataBaseField], tmp)
+	ret[logField] = cfg[logField]
 	return ret, nil
 }
 
@@ -70,6 +71,6 @@ func parseError(err error) (string, int) {
 
 func getSessionId(id string) string {
 	h := sha256.New()
-	h.Write([]byte(id + secret))
+	h.Write([]byte(id + secretSessionId))
 	return base64.URLEncoding.EncodeToString(h.Sum(nil))
 }

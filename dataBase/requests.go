@@ -2,7 +2,6 @@ package dataBase
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
 	"regexp"
@@ -15,11 +14,12 @@ type DataBase struct {
 }
 
 type DBConfig struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	DbName   string `json:"dbName"`
-	Ip       string `json:"ip"`
-	Port     int    `json:"port"`
+	Username       string `json:"username"`
+	Password       string `json:"password"`
+	DbName         string `json:"dbName"`
+	Ip             string `json:"ip"`
+	Port           int    `json:"port"`
+	ReInitDataBase bool   `json:"reInitDataBase"`
 }
 
 func NewDataBase(config *DBConfig) (*DataBase, error) {
@@ -35,6 +35,11 @@ func NewDataBase(config *DBConfig) (*DataBase, error) {
 	}
 	ret := &DataBase{
 		Connection: conn,
+	}
+	if config.ReInitDataBase {
+		if err = ret.createNewDataBase(); err != nil {
+			return nil, err
+		}
 	}
 	return ret, nil
 }
@@ -113,13 +118,50 @@ func (db *DataBase) SearchUser(query, from, count string) ([]entities.UserInfo, 
 	return ret, nil
 }
 
-func (db *DataBase) append(query string, args ...interface{}) error {
-	result, err := db.Connection.Exec(query, args...)
+func (db *DataBase) LogAdd(logInfo *entities.Log) error {
+	if err := db.append("INSERT INTO log VALUES($1, $2, $3, $4, $5, $6)",
+		logInfo.Time, logInfo.Request, logInfo.Error, logInfo.Body, logInfo.Query,
+		logInfo.Headers); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DataBase) AddDeveloper(userId string) error {
+	if err := db.append("INSERT into developers VALUES($1)", userId); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DataBase) CheckDeveloper(userId string) error {
+	result, err := db.Connection.Query("SELECT * FROM developers WHERE user_id = $1", userId)
 	if err != nil {
 		return err
 	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil || rowsAffected != 1 {
+	if !result.Next() {
+		return UserNotFoundError
+	}
+	return nil
+}
+
+func (db *DataBase) AddTag(tag *entities.Tag) error {
+	if err := db.validateTag(tag); err != nil {
+		return err
+	}
+	if err := db.append("INSERT into tags VALUES($1, $2)", tag.Name, tag.Description); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DataBase) AddTask(task *entities.Task) error {
+	if err := db.validateTask(task); err != nil {
+		return err
+	}
+	if err := db.append("INSERT into tasks VALUES($1, $2, $3, $4, $5)",
+		task.Name, task.Description, task.RecommendedTime,
+		task.Picture, task.BackgroundPicture); err != nil {
 		return err
 	}
 	return nil
@@ -173,35 +215,39 @@ func (db *DataBase) validateUserInfo(userInfo *entities.Registration) error {
 	return nil
 }
 
-func (db *DataBase) getUserInfo(result *sql.Rows) (*entities.UserInfo, error) {
-	var err error
-	ret := &entities.UserInfo{}
-	var regTime, onlineTime string
-
-	if err := result.Scan(&ret.UserId, &ret.FirstName, &ret.LastName, &regTime,
-		&ret.Gender, &onlineTime, &ret.Picture, &ret.BackgroundPicture); err != nil {
-		return nil, err
+func (db *DataBase) validateTag(tag *entities.Tag) error {
+	if len(tag.Name) > 50 {
+		return db.errorConstructLong(FieldTooLongError, "50", "tag_name")
 	}
-
-	ret.RegistrationTime, err = time.Parse(time.RFC1123, regTime)
+	if len(tag.Description) > 256 {
+		return db.errorConstructLong(FieldTooLongError, "256", "description")
+	}
+	result, err := db.Connection.Exec("SELECT tag_name FROM tags WHERE tag_name = $1", tag.Name)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	ret.OnlineTime, err = time.Parse(time.RFC1123, onlineTime)
-	if err != nil {
-		return nil, err
+	rowsAffected, err := result.RowsAffected()
+	if err != nil || rowsAffected == 1 {
+		return TagUniqueError
 	}
-	return ret, nil
+	return nil
 }
 
-func (db *DataBase) errorConstructLong(err error, size, name string) error {
-	return errors.New(err.Error() + size + " bytes for field '" + name + "')")
-}
-
-func (db *DataBase) errorConstructValue(err error, name string, values ...string) error {
-	var res string
-	for _, elem := range values {
-		res += elem + "/"
+func (db *DataBase) validateTask(task *entities.Task) error {
+	if len(task.Name) > 50 {
+		return db.errorConstructLong(FieldTooLongError, "50", "task_name")
 	}
-	return errors.New(err.Error() + "'" + name + "'" + " allowed values: " + res)
+	if len(task.Description) > 256 {
+		return db.errorConstructLong(FieldTooLongError, "256", "description")
+	}
+	if len(task.Picture) > 512 {
+		return db.errorConstructLong(FieldTooLongError, "512", "picture")
+	}
+	if len(task.BackgroundPicture) > 512 {
+		return db.errorConstructLong(FieldTooLongError, "512", "backgroundPicture")
+	}
+	if len(task.RecommendedTime) > 256 {
+		return db.errorConstructLong(FieldTooLongError, "256", "recommendedTime")
+	}
+	return nil
 }
