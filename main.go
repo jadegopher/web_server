@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	config, err := getConfig("config.json")
+	config, err := getConfig("secureConfig.json")
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
