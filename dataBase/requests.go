@@ -155,6 +155,18 @@ func (db *DataBase) AddTag(tag *entities.Tag) error {
 	return nil
 }
 
+func (db *DataBase) AddTask(task *entities.Task) error {
+	if err := db.validateTask(task); err != nil {
+		return err
+	}
+	if err := db.append("INSERT into tasks VALUES($1, $2, $3, $4, $5)",
+		task.Name, task.Description, task.RecommendedTime,
+		task.Picture, task.BackgroundPicture); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (db *DataBase) validateUserInfo(userInfo *entities.Registration) error {
 	r := regexp.MustCompile(nickReg)
 	if !r.MatchString(userInfo.UserId) {
@@ -217,6 +229,25 @@ func (db *DataBase) validateTag(tag *entities.Tag) error {
 	rowsAffected, err := result.RowsAffected()
 	if err != nil || rowsAffected == 1 {
 		return TagUniqueError
+	}
+	return nil
+}
+
+func (db *DataBase) validateTask(task *entities.Task) error {
+	if len(task.Name) > 50 {
+		return db.errorConstructLong(FieldTooLongError, "50", "task_name")
+	}
+	if len(task.Description) > 256 {
+		return db.errorConstructLong(FieldTooLongError, "256", "description")
+	}
+	if len(task.Picture) > 512 {
+		return db.errorConstructLong(FieldTooLongError, "512", "picture")
+	}
+	if len(task.BackgroundPicture) > 512 {
+		return db.errorConstructLong(FieldTooLongError, "512", "backgroundPicture")
+	}
+	if len(task.RecommendedTime) > 256 {
+		return db.errorConstructLong(FieldTooLongError, "256", "recommendedTime")
 	}
 	return nil
 }
