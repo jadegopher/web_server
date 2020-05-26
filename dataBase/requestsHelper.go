@@ -8,13 +8,30 @@ import (
 )
 
 func (db *DataBase) createNewDataBase() error {
+	if err := db.createLogTable(); err != nil {
+		return err
+	}
+	if err := db.createUserPrivateTable(); err != nil {
+		return err
+	}
+	if err := db.createUserInfoTable(); err != nil {
+		return err
+	}
+	if err := db.createDevelopersTable(); err != nil {
+		return err
+	}
+	if err := db.createTagsTable(); err != nil {
+		return err
+	}
+	if err := db.createTasksTable(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DataBase) createLogTable() error {
 	_, err := db.Connection.Exec(`
 		DROP TABLE IF EXISTS log;
-		DROP TABLE IF EXISTS user_info;
-		DROP TABLE IF EXISTS developers;
-		DROP TABLE IF EXISTS user_private;
-		DROP TABLE IF EXISTS tags;
-		DROP TABLE IF EXISTS tasks;
 		CREATE TABLE log(
   			time        VARCHAR(256) NOT NULL,
     		request     VARCHAR(256) NOT NULL,
@@ -22,19 +39,25 @@ func (db *DataBase) createNewDataBase() error {
     		body        text,
     		query       text,
     		headers     text
-			);
+			);`)
+	return err
+}
+
+func (db *DataBase) createUserPrivateTable() error {
+	_, err := db.Connection.Exec(`
+		DROP TABLE IF EXISTS user_private CASCADE;
 		CREATE TABLE user_private
 		(
    	 		user_id  VARCHAR(256) NOT NULL UNIQUE PRIMARY KEY,
     		email    VARCHAR(256) NOT NULL UNIQUE,
     		password VARCHAR(256) NOT NULL
-		);
-		CREATE TABLE developers
-		(
-		    user_id VARCHAR(256) NOT NULL,
-		    PRIMARY KEY (user_id),
-    		FOREIGN KEY (user_id) REFERENCES user_private (user_id)
-		);
+		);`)
+	return err
+}
+
+func (db *DataBase) createUserInfoTable() error {
+	_, err := db.Connection.Exec(`
+		DROP TABLE IF EXISTS user_info;
 		CREATE TABLE user_info
 		(
     		user_id            VARCHAR(256) NOT NULL UNIQUE,
@@ -46,12 +69,36 @@ func (db *DataBase) createNewDataBase() error {
     		picture            VARCHAR(512),
     		background_picture VARCHAR(512),
     		PRIMARY KEY (user_id),
-    		FOREIGN KEY (user_id) REFERENCES user_private (user_id)
-		);
+    		FOREIGN KEY (user_id) REFERENCES user_private (user_id) ON DELETE CASCADE
+		);`)
+	return err
+}
+
+func (db *DataBase) createDevelopersTable() error {
+	_, err := db.Connection.Exec(`
+		DROP TABLE IF EXISTS developers;
+		CREATE TABLE developers
+		(
+		    user_id VARCHAR(256) NOT NULL,
+		    PRIMARY KEY (user_id),
+    		FOREIGN KEY (user_id) REFERENCES user_private (user_id) ON DELETE CASCADE
+		);`)
+	return err
+}
+
+func (db *DataBase) createTagsTable() error {
+	_, err := db.Connection.Exec(`
+		DROP TABLE IF EXISTS tags;
 		CREATE TABLE tags (
   			tag_name VARCHAR (50) NOT NULL UNIQUE,
   			description VARCHAR (256)         
-		);
+		);`)
+	return err
+}
+
+func (db *DataBase) createTasksTable() error {
+	_, err := db.Connection.Exec(`
+		DROP TABLE IF EXISTS tasks;
 		CREATE TABLE tasks (
     		task_name          VARCHAR(50)  NOT NULL UNIQUE,
     		description        VARCHAR(256) NOT NULL,
@@ -59,10 +106,7 @@ func (db *DataBase) createNewDataBase() error {
     		picture            VARCHAR(512),
     		background_picture VARCHAR(512)
 		);`)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (db *DataBase) append(query string, args ...interface{}) error {
