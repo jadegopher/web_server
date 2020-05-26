@@ -104,6 +104,39 @@ func (handler *Handlers) searchUserHelper(w http.ResponseWriter, r *http.Request
 	return nil
 }
 
+func (handler *Handlers) deleteUserHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateSession(r); err != nil {
+		return err
+	}
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+	err = r.Body.Close()
+	if err != nil {
+		return err
+	}
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
+	userInfo := &entities.UserPrivate{}
+	if err = json.Unmarshal(data, userInfo); err != nil {
+		return err
+	}
+	userId, err := handler.DataBase.Login(userInfo)
+	if err != nil {
+		return err
+	}
+	if userId != r.Header.Get(userIdField) {
+		return credError
+	}
+	if err := handler.DataBase.DeleteUser(userId); err != nil {
+		return err
+	}
+	if err = json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (handler *Handlers) getDeveloperAccountHelper(w http.ResponseWriter, r *http.Request) error {
 	if err := handler.validateSession(r); err != nil {
 		return err

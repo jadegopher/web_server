@@ -23,6 +23,7 @@ func main() {
 	router.HandleFunc("/login", handlers.Login).Methods("POST")
 	router.HandleFunc("/profiles/{id}", handlers.GetUserInfo).Methods("GET")
 	router.HandleFunc("/search", handlers.SearchUser).Methods("GET")
+	router.HandleFunc("/delete", handlers.DeleteUser).Methods("POST")
 
 	//For developers
 	router.HandleFunc("/developers/getAccount", handlers.GetDeveloperAccount).Methods("GET")

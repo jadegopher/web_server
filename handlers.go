@@ -54,6 +54,16 @@ func (handler *Handlers) SearchUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (handler *Handlers) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	var err error
+	if err = handler.deleteUserHelper(w, r); err != nil {
+		handler.defaultErrorResponse(w, err)
+	}
+	if handler.Log {
+		handler.addLog(r, "DeleteUser", err)
+	}
+}
+
 func (handler *Handlers) GetDeveloperAccount(w http.ResponseWriter, r *http.Request) {
 	var err error
 	if err = handler.getDeveloperAccountHelper(w, r); err != nil {
