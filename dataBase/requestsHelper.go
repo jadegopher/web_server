@@ -154,8 +154,8 @@ func (db *DataBase) getUserInfo(result *sql.Rows) (*entities.UserInfo, error) {
 	return ret, nil
 }
 
-func (db *DataBase) errorConstructLong(err error, size, name string) error {
-	return errors.New(err.Error() + size + " bytes for field '" + name + "')")
+func (db *DataBase) errorConstructLong(size, name string) error {
+	return errors.New(FieldTooLongError.Error() + size + " bytes for field '" + name + "')")
 }
 
 func (db *DataBase) errorConstructValue(err error, name string, values ...string) error {
@@ -163,5 +163,9 @@ func (db *DataBase) errorConstructValue(err error, name string, values ...string
 	for _, elem := range values {
 		res += elem + "/"
 	}
-	return errors.New(err.Error() + "'" + name + "'" + " allowed values: " + res)
+	return errors.New(err.Error() + "'" + name + "' allowed values: " + res)
+}
+
+func (db *DataBase) errorConstructTag(name string) error {
+	return errors.New(TagExistError.Error() + "'" + name + "' doesn't exist")
 }

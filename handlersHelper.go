@@ -151,7 +151,7 @@ func (handler *Handlers) addTagsToUserHelper(w http.ResponseWriter, r *http.Requ
 	}
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
 	var tags []entities.Tag
-	if err = json.Unmarshal(data, tags); err != nil {
+	if err = json.Unmarshal(data, &tags); err != nil {
 		return err
 	}
 	if err = handler.DataBase.AddTagsToUser(r.Header.Get(userIdField), tags); err != nil {

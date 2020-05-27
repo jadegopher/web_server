@@ -11,4 +11,5 @@ var (
 	WrongSymbolsError   = errors.New("105 wrong symbols")
 	LoginError          = errors.New("106 login error")
 	TagUniqueError      = errors.New("107 tag with this name already exists")
+	TagExistError       = errors.New("108 tag with name ")
 )

@@ -130,12 +130,42 @@ func (db *DataBase) AddTagsToUser(userId string, tags []entities.Tag) error {
 	if err != nil {
 		return err
 	}
+	reqTags := make(map[string]entities.Tag)
+	for _, tag := range tags {
+		if _, in := reqTags[tag.Name]; !in {
+			reqTags[tag.Name] = tag
+		}
+	}
 	fmt.Println(userTags)
+	for _, userTag := range userTags {
+		if _, in := reqTags[userTag.TagName]; !in {
+			if _, err := db.Connection.Exec(`DELETE FROM user_tags 
+					WHERE tag_name = $1 AND user_id = $2`,
+				userTag.TagName, userId); err != nil {
+				return err
+			}
+		} else {
+			delete(reqTags, userTag.TagName)
+		}
+	}
+	for _, value := range reqTags {
+		result, err := db.Connection.Query("SELECT * FROM tags WHERE tag_name = $1", value.Name)
+		if err != nil {
+			return err
+		}
+		if !result.Next() {
+			return db.errorConstructTag(value.Name)
+		}
+		if err := db.append("INSERT INTO user_tags VALUES($1, $2, $3)",
+			userId, value.Name, 5); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
-func (db *DataBase) GetUsersTags(userId string) ([]entities.Tag, error) {
-	userTags := make([]entities.Tag, 0)
+func (db *DataBase) GetUsersTags(userId string) ([]entities.UserTags, error) {
+	userTags := make([]entities.UserTags, 0)
 	result, err := db.Connection.Query("SELECT * FROM user_info WHERE user_id = $1", userId)
 	if err != nil {
 		return nil, err
@@ -147,12 +177,12 @@ func (db *DataBase) GetUsersTags(userId string) ([]entities.Tag, error) {
 	if err != nil {
 		return nil, err
 	}
-	i := 0
 	for result.Next() {
-		userTags = append(userTags, entities.Tag{})
-		if err := result.Scan(&userTags[i].Name, &userTags[i].Description); err != nil {
+		tmp := entities.UserTags{}
+		if err := result.Scan(&tmp.UserID, &tmp.TagName, &tmp.Rating); err != nil {
 			return nil, err
 		}
+		userTags = append(userTags, tmp)
 	}
 	return userTags, nil
 }
