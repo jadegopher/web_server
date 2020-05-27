@@ -108,6 +108,19 @@ func (db *DataBase) createTasksTable() error {
 	return err
 }
 
+func (db *DataBase) createUserTagsTable() error {
+	_, err := db.Connection.Exec(`
+		DROP TABLE IF EXISTS user_tags;
+		CREATE TABLE user_tags (
+		    user_id VARCHAR(256) NOT NULL,
+    		tag_name VARCHAR(50) NOT NULL,
+    		rating INTEGER NOT NULL,
+    		FOREIGN KEY (user_id) REFERENCES user_private (user_id) ON DELETE CASCADE,
+    		FOREIGN KEY (tag_name) REFERENCES tags (tag_name) ON DELETE CASCADE
+		);`)
+	return err
+}
+
 func (db *DataBase) append(query string, args ...interface{}) error {
 	result, err := db.Connection.Exec(query, args...)
 	if err != nil {

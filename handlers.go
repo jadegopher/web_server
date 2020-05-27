@@ -64,6 +64,26 @@ func (handler *Handlers) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (handler *Handlers) AddTagsToUser(w http.ResponseWriter, r *http.Request) {
+	var err error
+	if err = handler.addTagsToUserHelper(w, r); err != nil {
+		handler.defaultErrorResponse(w, err)
+	}
+	if handler.Log {
+		handler.addLog(r, "AddTagsToUser", err)
+	}
+}
+
+func (handler *Handlers) GetUsersTags(w http.ResponseWriter, r *http.Request) {
+	var err error
+	if err = handler.getUsersTagsHelper(w, r); err != nil {
+		handler.defaultErrorResponse(w, err)
+	}
+	if handler.Log {
+		handler.addLog(r, "GetUsersTags", err)
+	}
+}
+
 func (handler *Handlers) GetDeveloperAccount(w http.ResponseWriter, r *http.Request) {
 	var err error
 	if err = handler.getDeveloperAccountHelper(w, r); err != nil {

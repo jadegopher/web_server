@@ -137,6 +137,47 @@ func (handler *Handlers) deleteUserHelper(w http.ResponseWriter, r *http.Request
 	return nil
 }
 
+func (handler *Handlers) addTagsToUserHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateSession(r); err != nil {
+		return err
+	}
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+	err = r.Body.Close()
+	if err != nil {
+		return err
+	}
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
+	var tags []entities.Tag
+	if err = json.Unmarshal(data, tags); err != nil {
+		return err
+	}
+	if err = handler.DataBase.AddTagsToUser(r.Header.Get(userIdField), tags); err != nil {
+		return err
+	}
+	if err = json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (handler *Handlers) getUsersTagsHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateSession(r); err != nil {
+		return err
+	}
+	parameters := mux.Vars(r)
+	tags, err := handler.DataBase.GetUsersTags(parameters["id"])
+	if err != nil {
+		return err
+	}
+	if err = json.NewEncoder(w).Encode(toAnswer(tags, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (handler *Handlers) getDeveloperAccountHelper(w http.ResponseWriter, r *http.Request) error {
 	if err := handler.validateSession(r); err != nil {
 		return err

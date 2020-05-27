@@ -118,6 +118,45 @@ func (db *DataBase) SearchUser(userId, query, from, count string) ([]entities.Us
 	return ret, nil
 }
 
+func (db *DataBase) DeleteUser(userId string) error {
+	if _, err := db.Connection.Exec("DELETE FROM user_private WHERE user_id = $1", userId); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (db *DataBase) AddTagsToUser(userId string, tags []entities.Tag) error {
+	userTags, err := db.GetUsersTags(userId)
+	if err != nil {
+		return err
+	}
+	fmt.Println(userTags)
+	return nil
+}
+
+func (db *DataBase) GetUsersTags(userId string) ([]entities.Tag, error) {
+	userTags := make([]entities.Tag, 0)
+	result, err := db.Connection.Query("SELECT * FROM user_info WHERE user_id = $1", userId)
+	if err != nil {
+		return nil, err
+	}
+	if !result.Next() {
+		return nil, UserNotFoundError
+	}
+	result, err = db.Connection.Query("SELECT * FROM user_tags WHERE user_id = $1", userId)
+	if err != nil {
+		return nil, err
+	}
+	i := 0
+	for result.Next() {
+		userTags = append(userTags, entities.Tag{})
+		if err := result.Scan(&userTags[i].Name, &userTags[i].Description); err != nil {
+			return nil, err
+		}
+	}
+	return userTags, nil
+}
+
 func (db *DataBase) LogAdd(logInfo *entities.Log) error {
 	if err := db.append("INSERT INTO log VALUES($1, $2, $3, $4, $5, $6)",
 		logInfo.Time, logInfo.Request, logInfo.Error, logInfo.Body, logInfo.Query,
@@ -162,13 +201,6 @@ func (db *DataBase) AddTask(task *entities.Task) error {
 	if err := db.append("INSERT into tasks VALUES($1, $2, $3, $4, $5)",
 		task.Name, task.Description, task.RecommendedTime,
 		task.Picture, task.BackgroundPicture); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (db *DataBase) DeleteUser(userId string) error {
-	if _, err := db.Connection.Exec("DELETE FROM user_private WHERE user_id = $1", userId); err != nil {
 		return err
 	}
 	return nil
