@@ -94,7 +94,7 @@ func (handler *Handlers) searchUserHelper(w http.ResponseWriter, r *http.Request
 	if _, in := query[countField]; !in {
 		return handler.errorConstructField(fieldNotFoundError, countField)
 	}
-	users, err := handler.DataBase.SearchUser(query[queryField][0], query[fromField][0], query[countField][0])
+	users, err := handler.DataBase.SearchUser(r.Header.Get(userIdField), query[queryField][0], query[fromField][0], query[countField][0])
 	if err != nil {
 		return err
 	}

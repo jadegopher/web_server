@@ -48,8 +48,9 @@ func (db *DataBase) createUserPrivateTable() error {
 		DROP TABLE IF EXISTS user_private CASCADE;
 		CREATE TABLE user_private
 		(
-   	 		user_id  VARCHAR(256) NOT NULL UNIQUE PRIMARY KEY,
+   	 		user_id  VARCHAR(256) PRIMARY KEY,
     		email    VARCHAR(256) NOT NULL UNIQUE,
+    		privacy	 INTEGER NOT NULL,
     		password VARCHAR(256) NOT NULL
 		);`)
 	return err
@@ -60,7 +61,7 @@ func (db *DataBase) createUserInfoTable() error {
 		DROP TABLE IF EXISTS user_info;
 		CREATE TABLE user_info
 		(
-    		user_id            VARCHAR(256) NOT NULL UNIQUE,
+    		user_id            VARCHAR(256) PRIMARY KEY,
     		first_name         VARCHAR(256) NOT NULL,
     		last_name          VARCHAR(256) NOT NULL,
     		registration_time  VARCHAR(256) NOT NULL,
@@ -68,7 +69,6 @@ func (db *DataBase) createUserInfoTable() error {
     		online_time        VARCHAR(256) NOT NULL,
     		picture            VARCHAR(512),
     		background_picture VARCHAR(512),
-    		PRIMARY KEY (user_id),
     		FOREIGN KEY (user_id) REFERENCES user_private (user_id) ON DELETE CASCADE
 		);`)
 	return err
@@ -80,7 +80,6 @@ func (db *DataBase) createDevelopersTable() error {
 		CREATE TABLE developers
 		(
 		    user_id VARCHAR(256) NOT NULL,
-		    PRIMARY KEY (user_id),
     		FOREIGN KEY (user_id) REFERENCES user_private (user_id) ON DELETE CASCADE
 		);`)
 	return err
@@ -90,7 +89,7 @@ func (db *DataBase) createTagsTable() error {
 	_, err := db.Connection.Exec(`
 		DROP TABLE IF EXISTS tags;
 		CREATE TABLE tags (
-  			tag_name VARCHAR (50) NOT NULL UNIQUE,
+  			tag_name VARCHAR (50) PRIMARY KEY,
   			description VARCHAR (256)         
 		);`)
 	return err
@@ -100,7 +99,7 @@ func (db *DataBase) createTasksTable() error {
 	_, err := db.Connection.Exec(`
 		DROP TABLE IF EXISTS tasks;
 		CREATE TABLE tasks (
-    		task_name          VARCHAR(50)  NOT NULL UNIQUE,
+    		task_name          VARCHAR(50)  PRIMARY KEY,
     		description        VARCHAR(256) NOT NULL,
     		time               VARCHAR(256) NOT NULL,
     		picture            VARCHAR(512),

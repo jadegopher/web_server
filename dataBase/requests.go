@@ -97,12 +97,13 @@ func (db *DataBase) GetUserInfo(id string) (*entities.UserInfo, error) {
 	return ret, nil
 }
 
-func (db *DataBase) SearchUser(query, from, count string) ([]entities.UserInfo, error) {
+func (db *DataBase) SearchUser(userId, query, from, count string) ([]entities.UserInfo, error) {
 	result, err := db.Connection.Query(`SELECT *
 		FROM user_info
-		WHERE LOWER(user_id) LIKE LOWER($1)
-		OR LOWER(first_name) LIKE LOWER($1)
-		OR LOWER(last_name) LIKE LOWER($1) LIMIT $2 OFFSET $3`, query+"%", count, from)
+		WHERE user_id != $1 AND
+		(LOWER(user_id) LIKE LOWER($2)
+		OR LOWER(first_name) LIKE LOWER($2)
+		OR LOWER(last_name) LIKE LOWER($2)) LIMIT $3 OFFSET $4`, userId, query+"%", count, from)
 	if err != nil {
 		return nil, err
 	}
