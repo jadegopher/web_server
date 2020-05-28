@@ -25,10 +25,13 @@ func main() {
 	router.HandleFunc("/search", handlers.SearchUser).Methods("GET")
 	router.HandleFunc("/delete", handlers.DeleteUser).Methods("POST")
 	router.HandleFunc("/tags/add", handlers.AddTagsToUser).Methods("POST")
-	router.HandleFunc("/tags/get/{id}", handlers.GetUsersTags).Methods("GET")
+	router.HandleFunc("/tags/get/{id}", handlers.GetUserTags).Methods("GET")
+	router.HandleFunc("/tasks/{taskName}", handlers.GetTaskInfo).Methods("GET")
+	router.HandleFunc("/tasks/{taskName}/tags", handlers.GetTaskTags).Methods("GET")
 	//For developers
 	router.HandleFunc("/developers/getAccount", handlers.GetDeveloperAccount).Methods("GET")
 	router.HandleFunc("/developers/postTag", handlers.PostTag).Methods("POST")
-	router.HandleFunc("/developers/postTask", handlers.PostTask).Methods("POST")
+	router.HandleFunc("/developers/tasks/post", handlers.PostTask).Methods("POST")
+	router.HandleFunc("/developers/tasks/addTags/{taskName}", handlers.AddTagsToTask).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8000", router))
 }

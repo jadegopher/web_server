@@ -87,5 +87,13 @@ func (db *DataBase) validateTask(task *entities.Task) error {
 	if len(task.RecommendedTime) > 256 {
 		return db.errorConstructLong("256", "recommendedTime")
 	}
+	result, err := db.Connection.Exec("SELECT task_name FROM tasks WHERE task_name = $1", task.Name)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil || rowsAffected == 1 {
+		return TaskUniqueError
+	}
 	return nil
 }

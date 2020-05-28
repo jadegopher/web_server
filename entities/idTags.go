@@ -1,7 +1,7 @@
 package entities
 
-type UserTags struct {
-	UserID  string `json:"userId"`
+type IdTags struct {
+	Id      string `json:"id"`
 	TagName string `json:"tagName"`
 	Rating  int    `json:"rating"`
 }

@@ -163,16 +163,46 @@ func (handler *Handlers) addTagsToUserHelper(w http.ResponseWriter, r *http.Requ
 	return nil
 }
 
-func (handler *Handlers) getUsersTagsHelper(w http.ResponseWriter, r *http.Request) error {
-	if err := handler.validateSession(r); err != nil {
+func (handler *Handlers) getUserTagsHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateDeveloperSession(r); err != nil {
 		return err
 	}
 	parameters := mux.Vars(r)
-	tags, err := handler.DataBase.GetUsersTags(parameters["id"])
+	tags, err := handler.DataBase.GetUserTags(parameters["id"])
 	if err != nil {
 		return err
 	}
 	if err = json.NewEncoder(w).Encode(toAnswer(tags, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (handler *Handlers) getTaskInfoHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateSession(r); err != nil {
+		return err
+	}
+	parameters := mux.Vars(r)
+	task, err := handler.DataBase.GetTaskInfo(parameters["taskName"])
+	if err != nil {
+		return err
+	}
+	if err := json.NewEncoder(w).Encode(toAnswer(task, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (handler *Handlers) getTaskTagsHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateSession(r); err != nil {
+		return err
+	}
+	parameters := mux.Vars(r)
+	tags, err := handler.DataBase.GetTaskTags(parameters["taskName"])
+	if err != nil {
+		return err
+	}
+	if err := json.NewEncoder(w).Encode(toAnswer(tags, nil)); err != nil {
 		return err
 	}
 	return nil
@@ -242,6 +272,33 @@ func (handler *Handlers) postTaskHelper(w http.ResponseWriter, r *http.Request) 
 		return err
 	}
 	if err = handler.DataBase.AddTask(taskInfo); err != nil {
+		return err
+	}
+	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (handler *Handlers) addTagsToTaskHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateDeveloperSession(r); err != nil {
+		return err
+	}
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return err
+	}
+	err = r.Body.Close()
+	if err != nil {
+		return err
+	}
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
+	var tags []entities.Tag
+	if err := json.Unmarshal(data, &tags); err != nil {
+		return err
+	}
+	parameters := mux.Vars(r)
+	if err := handler.DataBase.AddTagsToTask(parameters["taskName"], tags); err != nil {
 		return err
 	}
 	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {

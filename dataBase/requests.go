@@ -126,7 +126,7 @@ func (db *DataBase) DeleteUser(userId string) error {
 }
 
 func (db *DataBase) AddTagsToUser(userId string, tags []entities.Tag) error {
-	userTags, err := db.GetUsersTags(userId)
+	userTags, err := db.GetUserTags(userId)
 	if err != nil {
 		return err
 	}
@@ -136,7 +136,6 @@ func (db *DataBase) AddTagsToUser(userId string, tags []entities.Tag) error {
 			reqTags[tag.Name] = tag
 		}
 	}
-	fmt.Println(userTags)
 	for _, userTag := range userTags {
 		if _, in := reqTags[userTag.TagName]; !in {
 			if _, err := db.Connection.Exec(`DELETE FROM user_tags 
@@ -154,7 +153,7 @@ func (db *DataBase) AddTagsToUser(userId string, tags []entities.Tag) error {
 			return err
 		}
 		if !result.Next() {
-			return db.errorConstructTag(value.Name)
+			return db.errorConstructNotFound(TagNotFoundError, value.Name)
 		}
 		if err := db.append("INSERT INTO user_tags VALUES($1, $2, $3)",
 			userId, value.Name, 5); err != nil {
@@ -164,8 +163,7 @@ func (db *DataBase) AddTagsToUser(userId string, tags []entities.Tag) error {
 	return nil
 }
 
-func (db *DataBase) GetUsersTags(userId string) ([]entities.UserTags, error) {
-	userTags := make([]entities.UserTags, 0)
+func (db *DataBase) GetUserTags(userId string) ([]entities.IdTags, error) {
 	result, err := db.Connection.Query("SELECT * FROM user_info WHERE user_id = $1", userId)
 	if err != nil {
 		return nil, err
@@ -177,14 +175,47 @@ func (db *DataBase) GetUsersTags(userId string) ([]entities.UserTags, error) {
 	if err != nil {
 		return nil, err
 	}
-	for result.Next() {
-		tmp := entities.UserTags{}
-		if err := result.Scan(&tmp.UserID, &tmp.TagName, &tmp.Rating); err != nil {
-			return nil, err
-		}
-		userTags = append(userTags, tmp)
+	userTags, err := db.getTagsList(result)
+	if err != nil {
+		return nil, err
 	}
 	return userTags, nil
+}
+
+func (db *DataBase) GetTaskInfo(taskName string) (*entities.Task, error) {
+	result, err := db.Connection.Query("SELECT * FROM tasks WHERE task_name = $1", taskName)
+	if err != nil {
+		return nil, err
+	}
+	ret := &entities.Task{}
+	if result.Next() {
+		ret, err = db.getTaskInfo(result)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, db.errorConstructNotFound(TaskNotFoundError, taskName)
+	}
+	return ret, nil
+}
+
+func (db *DataBase) GetTaskTags(taskName string) ([]entities.IdTags, error) {
+	result, err := db.Connection.Query("SELECT * FROM tasks WHERE task_name = $1", taskName)
+	if err != nil {
+		return nil, err
+	}
+	if !result.Next() {
+		return nil, db.errorConstructNotFound(TaskNotFoundError, taskName)
+	}
+	result, err = db.Connection.Query("SELECT * FROM task_tags WHERE task_name = $1", taskName)
+	if err != nil {
+		return nil, err
+	}
+	taskTags, err := db.getTagsList(result)
+	if err != nil {
+		return nil, err
+	}
+	return taskTags, nil
 }
 
 func (db *DataBase) LogAdd(logInfo *entities.Log) error {
@@ -232,6 +263,44 @@ func (db *DataBase) AddTask(task *entities.Task) error {
 		task.Name, task.Description, task.RecommendedTime,
 		task.Picture, task.BackgroundPicture); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (db *DataBase) AddTagsToTask(taskName string, tags []entities.Tag) error {
+	taskTags, err := db.GetTaskTags(taskName)
+	if err != nil {
+		return err
+	}
+	reqTags := make(map[string]entities.Tag)
+	for _, tag := range tags {
+		if _, in := reqTags[tag.Name]; !in {
+			reqTags[tag.Name] = tag
+		}
+	}
+	for _, taskTag := range taskTags {
+		if _, in := reqTags[taskTag.TagName]; !in {
+			if _, err := db.Connection.Exec(`DELETE FROM task_tags 
+					WHERE tag_name = $1 AND task_name = $2`,
+				taskTag.TagName, taskTag.Id); err != nil {
+				return err
+			}
+		} else {
+			delete(reqTags, taskTag.TagName)
+		}
+	}
+	for _, value := range reqTags {
+		result, err := db.Connection.Query("SELECT * FROM tags WHERE tag_name = $1", value.Name)
+		if err != nil {
+			return err
+		}
+		if !result.Next() {
+			return db.errorConstructNotFound(TagNotFoundError, value.Name)
+		}
+		if err := db.append("INSERT INTO task_tags VALUES($1, $2, $3)",
+			taskName, value.Name, 5); err != nil {
+			return err
+		}
 	}
 	return nil
 }

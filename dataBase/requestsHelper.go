@@ -26,6 +26,9 @@ func (db *DataBase) createNewDataBase() error {
 	if err := db.createTasksTable(); err != nil {
 		return err
 	}
+	if err := db.createTaskTagsTable(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -121,6 +124,19 @@ func (db *DataBase) createUserTagsTable() error {
 	return err
 }
 
+func (db *DataBase) createTaskTagsTable() error {
+	_, err := db.Connection.Exec(`
+		DROP TABLE IF EXISTS task_tags;
+		CREATE TABLE task_tags (
+		    task_name VARCHAR(50) NOT NULL,
+    		tag_name VARCHAR(50) NOT NULL,
+    		rating INTEGER NOT NULL,
+    		FOREIGN KEY (task_name) REFERENCES tasks (task_name) ON DELETE CASCADE,
+    		FOREIGN KEY (tag_name) REFERENCES tags (tag_name) ON DELETE CASCADE
+		);`)
+	return err
+}
+
 func (db *DataBase) append(query string, args ...interface{}) error {
 	result, err := db.Connection.Exec(query, args...)
 	if err != nil {
@@ -154,6 +170,27 @@ func (db *DataBase) getUserInfo(result *sql.Rows) (*entities.UserInfo, error) {
 	return ret, nil
 }
 
+func (db *DataBase) getTaskInfo(result *sql.Rows) (*entities.Task, error) {
+	ret := &entities.Task{}
+	if err := result.Scan(&ret.Name, &ret.Description, &ret.RecommendedTime,
+		&ret.Picture, &ret.BackgroundPicture); err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+func (db *DataBase) getTagsList(result *sql.Rows) ([]entities.IdTags, error) {
+	ret := make([]entities.IdTags, 0)
+	for result.Next() {
+		tmp := entities.IdTags{}
+		if err := result.Scan(&tmp.Id, &tmp.TagName, &tmp.Rating); err != nil {
+			return nil, err
+		}
+		ret = append(ret, tmp)
+	}
+	return ret, nil
+}
+
 func (db *DataBase) errorConstructLong(size, name string) error {
 	return errors.New(FieldTooLongError.Error() + size + " bytes for field '" + name + "')")
 }
@@ -166,6 +203,6 @@ func (db *DataBase) errorConstructValue(err error, name string, values ...string
 	return errors.New(err.Error() + "'" + name + "' allowed values: " + res)
 }
 
-func (db *DataBase) errorConstructTag(name string) error {
-	return errors.New(TagExistError.Error() + "'" + name + "' doesn't exist")
+func (db *DataBase) errorConstructNotFound(err error, name string) error {
+	return errors.New(err.Error() + "'" + name + "' didn't find")
 }

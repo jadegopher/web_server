@@ -74,13 +74,33 @@ func (handler *Handlers) AddTagsToUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (handler *Handlers) GetUsersTags(w http.ResponseWriter, r *http.Request) {
+func (handler *Handlers) GetUserTags(w http.ResponseWriter, r *http.Request) {
 	var err error
-	if err = handler.getUsersTagsHelper(w, r); err != nil {
+	if err = handler.getUserTagsHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
 	if handler.Log {
-		handler.addLog(r, "GetUsersTags", err)
+		handler.addLog(r, "GetUserTags", err)
+	}
+}
+
+func (handler *Handlers) GetTaskInfo(w http.ResponseWriter, r *http.Request) {
+	var err error
+	if err = handler.getTaskInfoHelper(w, r); err != nil {
+		handler.defaultErrorResponse(w, err)
+	}
+	if handler.Log {
+		handler.addLog(r, "GetTaskInfo", err)
+	}
+}
+
+func (handler *Handlers) GetTaskTags(w http.ResponseWriter, r *http.Request) {
+	var err error
+	if err = handler.getTaskTagsHelper(w, r); err != nil {
+		handler.defaultErrorResponse(w, err)
+	}
+	if handler.Log {
+		handler.addLog(r, "GetTaskTags", err)
 	}
 }
 
@@ -111,5 +131,15 @@ func (handler *Handlers) PostTask(w http.ResponseWriter, r *http.Request) {
 	}
 	if handler.Log {
 		handler.addLog(r, "PostTask", err)
+	}
+}
+
+func (handler *Handlers) AddTagsToTask(w http.ResponseWriter, r *http.Request) {
+	var err error
+	if err = handler.addTagsToTaskHelper(w, r); err != nil {
+		handler.defaultErrorResponse(w, err)
+	}
+	if handler.Log {
+		handler.addLog(r, "AddTagsToTask", err)
 	}
 }
