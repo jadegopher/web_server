@@ -64,8 +64,7 @@ func (db *DataBase) AddUser(userInfo *entities.Registration) error {
 func (db *DataBase) Login(private *entities.Login) (string, error) {
 	result, err := db.Connection.Query(`SELECT * 
 		FROM user_private
- 		WHERE (user_id = $1 OR email = $1) 
- 		AND password = $2`, private.Identity, private.Password)
+ 		WHERE (user_id = $1 OR email = $1)`, private.Identity)
 	if err != nil {
 		return "", err
 	}
@@ -74,8 +73,11 @@ func (db *DataBase) Login(private *entities.Login) (string, error) {
 		if err := result.Scan(&ret.UserId, &ret.Email, &ret.Password); err != nil {
 			return "", err
 		}
+		if ret.Password != private.Password {
+			return "", LoginError
+		}
 	} else {
-		return "", LoginError
+		return "", UserNotFoundError
 	}
 	//TODO Update Online INfo
 	return ret.UserId, nil
