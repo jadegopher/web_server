@@ -64,6 +64,16 @@ func (handler *Handlers) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (handler *Handlers) GetTags(w http.ResponseWriter, r *http.Request) {
+	var err error
+	if err = handler.getTagsHelper(w, r); err != nil {
+		handler.defaultErrorResponse(w, err)
+	}
+	if handler.Log {
+		handler.addLog(r, "GetTags", err)
+	}
+}
+
 func (handler *Handlers) AddTagsToUser(w http.ResponseWriter, r *http.Request) {
 	var err error
 	if err = handler.addTagsToUserHelper(w, r); err != nil {

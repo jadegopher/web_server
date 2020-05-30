@@ -24,6 +24,7 @@ func main() {
 	router.HandleFunc("/profiles/{id}", handlers.GetUserInfo).Methods("GET")
 	router.HandleFunc("/search", handlers.SearchUser).Methods("GET")
 	router.HandleFunc("/delete", handlers.DeleteUser).Methods("POST")
+	router.HandleFunc("/tags", handlers.GetTags).Methods("GET")
 	router.HandleFunc("/tags/add", handlers.AddTagsToUser).Methods("POST")
 	router.HandleFunc("/tags/get/{id}", handlers.GetUserTags).Methods("GET")
 	router.HandleFunc("/tasks/{taskName}", handlers.GetTaskInfo).Methods("GET")

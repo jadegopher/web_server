@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"time"
 	"web_server/entities"
 )
@@ -91,11 +92,8 @@ func (handler *Handlers) searchUserHelper(w http.ResponseWriter, r *http.Request
 	if _, in := query[queryField]; !in {
 		return handler.errorConstructNotFound(fieldNotFoundError, queryField)
 	}
-	if _, in := query[fromField]; !in {
-		return handler.errorConstructNotFound(fieldNotFoundError, fromField)
-	}
-	if _, in := query[countField]; !in {
-		return handler.errorConstructNotFound(fieldNotFoundError, countField)
+	if err := handler.validateFromCountFields(query); err != nil {
+		return err
 	}
 	users, err := handler.DataBase.SearchUser(r.Header.Get(userIdField), query[queryField][0], query[fromField][0], query[countField][0])
 	if err != nil {
@@ -135,6 +133,24 @@ func (handler *Handlers) deleteUserHelper(w http.ResponseWriter, r *http.Request
 		return err
 	}
 	if err = json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (handler *Handlers) getTagsHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateSession(r); err != nil {
+		return err
+	}
+	query := r.URL.Query()
+	if err := handler.validateFromCountFields(query); err != nil {
+		return err
+	}
+	tags, err := handler.DataBase.GetTags(query[fromField][0], query[countField][0])
+	if err != nil {
+		return err
+	}
+	if err := json.NewEncoder(w).Encode(toAnswer(tags, nil)); err != nil {
 		return err
 	}
 	return nil
@@ -384,6 +400,16 @@ func (handler *Handlers) addLog(r *http.Request, reqName string, userErr error) 
 		log.Fatal(err.Error())
 		return
 	}
+}
+
+func (handler *Handlers) validateFromCountFields(query url.Values) error {
+	if _, in := query[fromField]; !in {
+		return handler.errorConstructNotFound(fieldNotFoundError, fromField)
+	}
+	if _, in := query[countField]; !in {
+		return handler.errorConstructNotFound(fieldNotFoundError, countField)
+	}
+	return nil
 }
 
 func (handler *Handlers) errorConstructNotFound(err error, name string) error {

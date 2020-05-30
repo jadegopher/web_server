@@ -137,6 +137,22 @@ func (db *DataBase) DeleteUser(userId string) error {
 	return nil
 }
 
+func (db *DataBase) GetTags(from, count string) ([]entities.Tag, error) {
+	result, err := db.Connection.Query(`SELECT * FROM tags LIMIT $1 OFFSET $2`, count, from)
+	if err != nil {
+		return nil, err
+	}
+	tags := make([]entities.Tag, 0)
+	for result.Next() {
+		tmp := entities.Tag{}
+		if err := result.Scan(&tmp.Name, &tmp.Description); err != nil {
+			return nil, err
+		}
+		tags = append(tags, tmp)
+	}
+	return tags, err
+}
+
 func (db *DataBase) AddTagsToUser(userId string, tags []entities.Tag) error {
 	userTags, err := db.GetUserTags(userId, true)
 	if err != nil {
