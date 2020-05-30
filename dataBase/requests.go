@@ -61,11 +61,11 @@ func (db *DataBase) AddUser(userInfo *entities.Registration) error {
 	return nil
 }
 
-func (db *DataBase) Login(private *entities.UserPrivate) (string, error) {
+func (db *DataBase) Login(private *entities.Login) (string, error) {
 	result, err := db.Connection.Query(`SELECT * 
 		FROM user_private
- 		WHERE (user_id = $1 OR email = $2) 
- 		AND password = $3`, private.UserId, private.Email, private.Password)
+ 		WHERE (user_id = $1 OR email = $1) 
+ 		AND password = $2`, private.Identity, private.Password)
 	if err != nil {
 		return "", err
 	}

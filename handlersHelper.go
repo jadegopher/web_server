@@ -46,7 +46,7 @@ func (handler *Handlers) loginHelper(w http.ResponseWriter, r *http.Request) err
 		return err
 	}
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
-	userInfo := &entities.UserPrivate{}
+	userInfo := &entities.Login{}
 	if err = json.Unmarshal(data, userInfo); err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (handler *Handlers) deleteUserHelper(w http.ResponseWriter, r *http.Request
 		return err
 	}
 	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
-	userInfo := &entities.UserPrivate{}
+	userInfo := &entities.Login{}
 	if err = json.Unmarshal(data, userInfo); err != nil {
 		return err
 	}
