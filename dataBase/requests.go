@@ -48,13 +48,14 @@ func (db *DataBase) AddUser(userInfo *entities.Registration) error {
 		return err
 	}
 	if err := db.append("INSERT INTO user_private VALUES($1, $2, $3)",
-		userInfo.UserId, userInfo.Email, userInfo.Password); err != nil {
+		userInfo.UserPrivate.UserId, userInfo.UserPrivate.Email, userInfo.UserPrivate.Password); err != nil {
 		return err
 	}
-	if err := db.append("INSERT INTO user_info VALUES($1, $2, $3, $4, $5, $6, $7, $8)",
-		userInfo.UserId, userInfo.FirstName, userInfo.LastName,
-		userInfo.RegistrationTime.Format(time.RFC1123), userInfo.Gender,
-		userInfo.OnlineTime.Format(time.RFC1123), userInfo.Picture, userInfo.BackgroundPicture); err != nil {
+	if err := db.append("INSERT INTO user_info VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)",
+		userInfo.UserPrivate.UserId, userInfo.UserInfo.FirstName, userInfo.UserInfo.LastName,
+		userInfo.UserInfo.RegistrationTime.Format(time.RFC1123), userInfo.UserInfo.Gender,
+		userInfo.UserInfo.OnlineTime.Format(time.RFC1123), userInfo.UserInfo.Private,
+		userInfo.UserInfo.Picture, userInfo.UserInfo.BackgroundPicture); err != nil {
 		return err
 	}
 	return nil

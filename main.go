@@ -14,7 +14,7 @@ func main() {
 	}
 	db, err := dataBase.NewDataBase(config[dataBaseField].(*dataBase.DBConfig))
 	if err != nil {
-		log.Fatalf("DataBase error")
+		log.Fatalf(err.Error())
 	}
 
 	router := mux.NewRouter()

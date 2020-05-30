@@ -26,6 +26,9 @@ func (db *DataBase) createNewDataBase() error {
 	if err := db.createTasksTable(); err != nil {
 		return err
 	}
+	if err := db.createUserTagsTable(); err != nil {
+		return err
+	}
 	if err := db.createTaskTagsTable(); err != nil {
 		return err
 	}
@@ -53,7 +56,6 @@ func (db *DataBase) createUserPrivateTable() error {
 		(
    	 		user_id  VARCHAR(256) PRIMARY KEY,
     		email    VARCHAR(256) NOT NULL UNIQUE,
-    		privacy	 INTEGER NOT NULL,
     		password VARCHAR(256) NOT NULL
 		);`)
 	return err
@@ -70,6 +72,7 @@ func (db *DataBase) createUserInfoTable() error {
     		registration_time  VARCHAR(256) NOT NULL,
     		gender             VARCHAR(10)  NOT NULL,
     		online_time        VARCHAR(256) NOT NULL,
+    		private			   INTEGER NOT NULL,
     		picture            VARCHAR(512),
     		background_picture VARCHAR(512),
     		FOREIGN KEY (user_id) REFERENCES user_private (user_id) ON DELETE CASCADE
@@ -90,7 +93,7 @@ func (db *DataBase) createDevelopersTable() error {
 
 func (db *DataBase) createTagsTable() error {
 	_, err := db.Connection.Exec(`
-		DROP TABLE IF EXISTS tags;
+		DROP TABLE IF EXISTS tags CASCADE;
 		CREATE TABLE tags (
   			tag_name VARCHAR (50) PRIMARY KEY,
   			description VARCHAR (256)         
@@ -100,7 +103,7 @@ func (db *DataBase) createTagsTable() error {
 
 func (db *DataBase) createTasksTable() error {
 	_, err := db.Connection.Exec(`
-		DROP TABLE IF EXISTS tasks;
+		DROP TABLE IF EXISTS tasks CASCADE;
 		CREATE TABLE tasks (
     		task_name          VARCHAR(50)  PRIMARY KEY,
     		description        VARCHAR(256) NOT NULL,
@@ -155,7 +158,7 @@ func (db *DataBase) getUserInfo(result *sql.Rows) (*entities.UserInfo, error) {
 	var regTime, onlineTime string
 
 	if err := result.Scan(&ret.UserId, &ret.FirstName, &ret.LastName, &regTime,
-		&ret.Gender, &onlineTime, &ret.Picture, &ret.BackgroundPicture); err != nil {
+		&ret.Gender, &onlineTime, &ret.Private, &ret.Picture, &ret.BackgroundPicture); err != nil {
 		return nil, err
 	}
 

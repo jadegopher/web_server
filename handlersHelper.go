@@ -26,10 +26,7 @@ func (handler *Handlers) registrationHelper(w http.ResponseWriter, r *http.Reque
 	if err = json.Unmarshal(data, userInfo); err != nil {
 		return err
 	}
-	if err = handler.validateRegFields(userInfo); err != nil {
-		return err
-	}
-	userInfo.RegistrationTime = time.Now()
+	userInfo.UserInfo.RegistrationTime = time.Now()
 	if err = handler.DataBase.AddUser(userInfo); err != nil {
 		return err
 	}
@@ -86,13 +83,13 @@ func (handler *Handlers) searchUserHelper(w http.ResponseWriter, r *http.Request
 	}
 	query := r.URL.Query()
 	if _, in := query[queryField]; !in {
-		return handler.errorConstructField(fieldNotFoundError, queryField)
+		return handler.errorConstructNotFound(fieldNotFoundError, queryField)
 	}
 	if _, in := query[fromField]; !in {
-		return handler.errorConstructField(fieldNotFoundError, fromField)
+		return handler.errorConstructNotFound(fieldNotFoundError, fromField)
 	}
 	if _, in := query[countField]; !in {
-		return handler.errorConstructField(fieldNotFoundError, countField)
+		return handler.errorConstructNotFound(fieldNotFoundError, countField)
 	}
 	users, err := handler.DataBase.SearchUser(r.Header.Get(userIdField), query[queryField][0], query[fromField][0], query[countField][0])
 	if err != nil {
@@ -338,29 +335,6 @@ func (handler *Handlers) defaultErrorResponse(w http.ResponseWriter, err error) 
 	http.Error(w, string(data), http.StatusBadRequest)
 }
 
-func (handler *Handlers) validateRegFields(userInfo *entities.Registration) error {
-	if userInfo.UserId == "" {
-		return handler.errorConstructField(fieldNotFoundError, userIdField)
-	}
-	if userInfo.Email == "" {
-		return handler.errorConstructField(fieldNotFoundError, emailField)
-	}
-	if userInfo.FirstName == "" {
-		return handler.errorConstructField(fieldNotFoundError, firstNameField)
-	}
-	if userInfo.LastName == "" {
-		return handler.errorConstructField(fieldNotFoundError, lastNameField)
-	}
-	if userInfo.Password == "" {
-		return handler.errorConstructField(fieldNotFoundError, passwordField)
-	}
-	return nil
-}
-
-func (handler *Handlers) errorConstructField(err error, add string) error {
-	return errors.New(err.Error() + "'" + add + "' " + "doesn't exist")
-}
-
 func (handler *Handlers) addLog(r *http.Request, reqName string, userErr error) {
 	headers, err := json.Marshal(r.Header)
 	if err != nil {
@@ -398,4 +372,8 @@ func (handler *Handlers) addLog(r *http.Request, reqName string, userErr error) 
 		log.Fatal(err.Error())
 		return
 	}
+}
+
+func (handler *Handlers) errorConstructNotFound(err error, name string) error {
+	return errors.New(err.Error() + "'" + name + "' didn't find")
 }

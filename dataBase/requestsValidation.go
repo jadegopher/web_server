@@ -6,35 +6,53 @@ import (
 )
 
 func (db *DataBase) validateUserInfo(userInfo *entities.Registration) error {
+	if userInfo.UserPrivate.UserId == "" {
+		return db.errorConstructNotFound(FieldNotFoundError, userIdField)
+	}
+	if userInfo.UserPrivate.Email == "" {
+		return db.errorConstructNotFound(FieldNotFoundError, emailField)
+	}
+	if userInfo.UserInfo.FirstName == "" {
+		return db.errorConstructNotFound(FieldNotFoundError, firstNameField)
+	}
+	if userInfo.UserInfo.LastName == "" {
+		return db.errorConstructNotFound(FieldNotFoundError, lastNameField)
+	}
+	if userInfo.UserPrivate.Password == "" {
+		return db.errorConstructNotFound(FieldNotFoundError, passwordField)
+	}
 	r := regexp.MustCompile(nickReg)
-	if !r.MatchString(userInfo.UserId) {
+	if !r.MatchString(userInfo.UserPrivate.UserId) {
 		return WrongSymbolsError
 	}
-	if len(userInfo.UserId) > 256 {
+	if len(userInfo.UserPrivate.UserId) > 256 {
 		return db.errorConstructLong("256", userIdField)
 	}
-	if len(userInfo.Email) > 256 {
+	if len(userInfo.UserPrivate.Email) > 256 {
 		return db.errorConstructLong("256", emailField)
 	}
-	if len(userInfo.Password) > 256 {
+	if len(userInfo.UserPrivate.Password) > 256 {
 		return db.errorConstructLong("256", passwordField)
 	}
-	if len(userInfo.FirstName) > 256 {
+	if len(userInfo.UserInfo.FirstName) > 256 {
 		return db.errorConstructLong("256", firstNameField)
 	}
-	if len(userInfo.LastName) > 256 {
+	if len(userInfo.UserInfo.LastName) > 256 {
 		return db.errorConstructLong("256", lastNameField)
 	}
-	if userInfo.Gender != male && userInfo.Gender != female && userInfo.Gender != another {
+	if userInfo.UserInfo.Gender != male && userInfo.UserInfo.Gender != female && userInfo.UserInfo.Gender != another {
 		return db.errorConstructValue(WrongValueError, "gender", male, female, another)
 	}
-	if len(userInfo.Picture) > 512 {
+	if len(userInfo.UserInfo.Picture) > 512 {
 		return db.errorConstructLong("512", pictureField)
 	}
-	if len(userInfo.BackgroundPicture) > 512 {
+	if len(userInfo.UserInfo.BackgroundPicture) > 512 {
 		return db.errorConstructLong("512", bgPictureField)
 	}
-	result, err := db.Connection.Exec("SELECT user_id FROM user_private WHERE user_id = $1", userInfo.UserId)
+	if userInfo.UserInfo.Private != 0 && userInfo.UserInfo.Private != 1 {
+		return db.errorConstructValue(WrongValueError, "private", "0", "1")
+	}
+	result, err := db.Connection.Exec("SELECT user_id FROM user_private WHERE user_id = $1", userInfo.UserPrivate.UserId)
 	if err != nil {
 		return err
 	}
@@ -42,7 +60,7 @@ func (db *DataBase) validateUserInfo(userInfo *entities.Registration) error {
 	if err != nil || rowsAffected == 1 {
 		return NicknameUniqueError
 	}
-	result, err = db.Connection.Exec("SELECT email FROM user_private WHERE email = $1", userInfo.Email)
+	result, err = db.Connection.Exec("SELECT email FROM user_private WHERE email = $1", userInfo.UserPrivate.Email)
 	if err != nil {
 		return err
 	}

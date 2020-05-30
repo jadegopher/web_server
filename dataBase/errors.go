@@ -14,4 +14,5 @@ var (
 	TagNotFoundError    = errors.New("108 tag with name ")
 	TaskNotFoundError   = errors.New("109 task with name ")
 	TaskUniqueError     = errors.New("110 task with this name already exist")
+	FieldNotFoundError  = errors.New("111 field with name ")
 )
