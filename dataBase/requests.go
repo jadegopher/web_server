@@ -83,10 +83,19 @@ func (db *DataBase) Login(private *entities.Login) (string, error) {
 	return ret.UserId, nil
 }
 
-func (db *DataBase) GetUserInfo(id string) (*entities.UserInfo, error) {
-	result, err := db.Connection.Query("SELECT * FROM user_info WHERE user_id = $1", id)
-	if err != nil {
-		return nil, err
+func (db *DataBase) GetUserInfo(id string, self bool) (*entities.UserInfo, error) {
+	var result *sql.Rows
+	var err error
+	if self {
+		result, err = db.Connection.Query("SELECT * FROM user_info WHERE user_id = $1", id)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		result, err = db.Connection.Query("SELECT * FROM user_info WHERE user_id = $1 AND private = 0", id)
+		if err != nil {
+			return nil, err
+		}
 	}
 	var ret *entities.UserInfo
 	if result.Next() {
@@ -103,7 +112,7 @@ func (db *DataBase) GetUserInfo(id string) (*entities.UserInfo, error) {
 func (db *DataBase) SearchUser(userId, query, from, count string) ([]entities.UserInfo, error) {
 	result, err := db.Connection.Query(`SELECT *
 		FROM user_info
-		WHERE user_id != $1 AND
+		WHERE user_id != $1 AND private = 0 AND
 		(LOWER(user_id) LIKE LOWER($2)
 		OR LOWER(first_name) LIKE LOWER($2)
 		OR LOWER(last_name) LIKE LOWER($2)) LIMIT $3 OFFSET $4`, userId, query+"%", count, from)
@@ -129,7 +138,7 @@ func (db *DataBase) DeleteUser(userId string) error {
 }
 
 func (db *DataBase) AddTagsToUser(userId string, tags []entities.Tag) error {
-	userTags, err := db.GetUserTags(userId)
+	userTags, err := db.GetUserTags(userId, true)
 	if err != nil {
 		return err
 	}
@@ -166,10 +175,19 @@ func (db *DataBase) AddTagsToUser(userId string, tags []entities.Tag) error {
 	return nil
 }
 
-func (db *DataBase) GetUserTags(userId string) ([]entities.IdTags, error) {
-	result, err := db.Connection.Query("SELECT * FROM user_info WHERE user_id = $1", userId)
-	if err != nil {
-		return nil, err
+func (db *DataBase) GetUserTags(userId string, self bool) ([]entities.IdTags, error) {
+	var result *sql.Rows
+	var err error
+	if self {
+		result, err = db.Connection.Query("SELECT * FROM user_info WHERE user_id = $1", userId)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		result, err = db.Connection.Query("SELECT * FROM user_info WHERE user_id = $1 AND private = 0", userId)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if !result.Next() {
 		return nil, UserNotFoundError

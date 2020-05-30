@@ -67,7 +67,13 @@ func (handler *Handlers) getUserInfoHelper(w http.ResponseWriter, r *http.Reques
 	}
 	parameters := mux.Vars(r)
 	//fmt.Println(parameters["id"])
-	user, err := handler.DataBase.GetUserInfo(parameters["id"])
+	var self bool
+	if parameters["id"] == r.Header.Get(userIdField) {
+		self = true
+	} else {
+		self = false
+	}
+	user, err := handler.DataBase.GetUserInfo(parameters["id"], self)
 	if err != nil {
 		return err
 	}
@@ -161,11 +167,17 @@ func (handler *Handlers) addTagsToUserHelper(w http.ResponseWriter, r *http.Requ
 }
 
 func (handler *Handlers) getUserTagsHelper(w http.ResponseWriter, r *http.Request) error {
-	if err := handler.validateDeveloperSession(r); err != nil {
+	if err := handler.validateSession(r); err != nil {
 		return err
 	}
 	parameters := mux.Vars(r)
-	tags, err := handler.DataBase.GetUserTags(parameters["id"])
+	var self bool
+	if parameters["id"] == r.Header.Get(userIdField) {
+		self = true
+	} else {
+		self = false
+	}
+	tags, err := handler.DataBase.GetUserTags(parameters["id"], self)
 	if err != nil {
 		return err
 	}
@@ -307,7 +319,7 @@ func (handler *Handlers) addTagsToTaskHelper(w http.ResponseWriter, r *http.Requ
 func (handler *Handlers) validateSession(r *http.Request) error {
 	sessionId := r.Header.Get(sessionIdField)
 	userId := r.Header.Get(userIdField)
-	_, err := handler.DataBase.GetUserInfo(userId)
+	_, err := handler.DataBase.GetUserInfo(userId, true)
 	if err != nil {
 		return err
 	}
