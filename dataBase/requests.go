@@ -305,11 +305,21 @@ func (db *DataBase) GetInvites(userId string) ([]entities.Quest, error) {
 	return invites, nil
 }
 
-func (db *DataBase) GetQuests(userId string) ([]entities.Quest, error) {
-	result, err := db.Connection.Query(`SELECT * FROM quests WHERE 
+func (db *DataBase) GetQuests(userId, status string) ([]entities.Quest, error) {
+	var result *sql.Rows
+	var err error
+	if status == "all" {
+		result, err = db.Connection.Query(`SELECT * FROM quests WHERE 
 		user_id = $1`, userId)
-	if err != nil {
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		result, err = db.Connection.Query(`SELECT * FROM quests WHERE 
+		user_id = $1 AND status = $2`, userId, status)
+		if err != nil {
+			return nil, err
+		}
 	}
 	invites, err := db.getQuestsList(result)
 	if err != nil {

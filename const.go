@@ -10,4 +10,5 @@ const (
 	fromField      = "from"
 	countField     = "count"
 	queryField     = "query"
+	statusField    = "status"
 )

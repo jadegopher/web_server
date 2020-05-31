@@ -249,7 +249,11 @@ func (handler *Handlers) getQuestsHelper(w http.ResponseWriter, r *http.Request)
 	if err := handler.validateSession(r); err != nil {
 		return err
 	}
-	invites, err := handler.DataBase.GetQuests(r.Header.Get(userIdField))
+	query := r.URL.Query()
+	if _, in := query[statusField]; !in {
+		return handler.errorConstructNotFound(fieldNotFoundError, statusField)
+	}
+	invites, err := handler.DataBase.GetQuests(r.Header.Get(userIdField), query[statusField][0])
 	if err != nil {
 		return err
 	}
