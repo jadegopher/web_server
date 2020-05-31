@@ -217,7 +217,7 @@ func (handler *Handlers) getTaskTagsHelper(w http.ResponseWriter, r *http.Reques
 	return nil
 }
 
-func (handler Handlers) inviteUserHelper(w http.ResponseWriter, r *http.Request) error {
+func (handler *Handlers) inviteUserHelper(w http.ResponseWriter, r *http.Request) error {
 	if err := handler.validateSession(r); err != nil {
 		return err
 	}
@@ -226,6 +226,20 @@ func (handler Handlers) inviteUserHelper(w http.ResponseWriter, r *http.Request)
 		return err
 	}
 	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (handler *Handlers) getInvitesHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateSession(r); err != nil {
+		return err
+	}
+	invites, err := handler.DataBase.GetInvites(r.Header.Get(userIdField))
+	if err != nil {
+		return err
+	}
+	if err := json.NewEncoder(w).Encode(toAnswer(invites, nil)); err != nil {
 		return err
 	}
 	return nil

@@ -43,10 +43,10 @@ func (db *DataBase) validateUserInfo(userInfo *entities.Registration) error {
 	if userInfo.UserInfo.Gender != male && userInfo.UserInfo.Gender != female && userInfo.UserInfo.Gender != another {
 		return db.errorConstructValue(WrongValueError, "gender", male, female, another)
 	}
-	if len(userInfo.UserInfo.Picture) > 512 {
+	if len(userInfo.UserInfo.Picture.String) > 512 {
 		return db.errorConstructLong("512", pictureField)
 	}
-	if len(userInfo.UserInfo.BackgroundPicture) > 512 {
+	if len(userInfo.UserInfo.BackgroundPicture.String) > 512 {
 		return db.errorConstructLong("512", bgPictureField)
 	}
 	if userInfo.UserInfo.Private != 0 && userInfo.UserInfo.Private != 1 {
@@ -75,7 +75,7 @@ func (db *DataBase) validateTag(tag *entities.Tag) error {
 	if len(tag.Name) > 50 {
 		return db.errorConstructLong("50", "tag_name")
 	}
-	if len(tag.Description) > 256 {
+	if len(tag.Description.String) > 256 {
 		return db.errorConstructLong("256", "description")
 	}
 	result, err := db.Connection.Exec("SELECT tag_name FROM tags WHERE tag_name = $1", tag.Name)
@@ -96,10 +96,10 @@ func (db *DataBase) validateTask(task *entities.Task) error {
 	if len(task.Description) > 256 {
 		return db.errorConstructLong("256", "description")
 	}
-	if len(task.Picture) > 512 {
+	if len(task.Picture.String) > 512 {
 		return db.errorConstructLong("512", "picture")
 	}
-	if len(task.BackgroundPicture) > 512 {
+	if len(task.BackgroundPicture.String) > 512 {
 		return db.errorConstructLong("512", "backgroundPicture")
 	}
 	if len(task.RecommendedTime) > 256 {

@@ -290,6 +290,25 @@ func (db *DataBase) InviteUser(user, userOpponent string) error {
 	return nil
 }
 
+func (db *DataBase) GetInvites(userId string) ([]entities.Quest, error) {
+	result, err := db.Connection.Query(`SELECT * FROM quests WHERE 
+		user_opponent = $1 AND status = $2`, userId, Pending)
+	if err != nil {
+		return nil, err
+	}
+	invites := make([]entities.Quest, 0)
+	for result.Next() {
+		tmp := entities.Quest{}
+		if err := result.Scan(&tmp.QuestId, &tmp.UserId, &tmp.TaskName,
+			&tmp.UserOpponent, &tmp.Status, &tmp.StartTime, &tmp.EndTime,
+			&tmp.DeadlineTime); err != nil {
+			return nil, err
+		}
+		invites = append(invites, tmp)
+	}
+	return invites, nil
+}
+
 func (db *DataBase) AddDeveloper(userId string) error {
 	if err := db.append("INSERT into developers VALUES($1)", userId); err != nil {
 		return err
