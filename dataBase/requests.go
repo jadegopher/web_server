@@ -268,6 +268,10 @@ func (db *DataBase) InviteUser(user, userOpponent string) error {
 	if user == userOpponent {
 		return InviteToYourselfError
 	}
+	_, err := db.GetUserInfo(userOpponent, false)
+	if err != nil {
+		return err
+	}
 	result, err := db.Connection.Query(`SELECT *
 		FROM quests
 		WHERE (user_id = $1 AND user_opponent = $2)
