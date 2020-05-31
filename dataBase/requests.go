@@ -145,9 +145,11 @@ func (db *DataBase) GetTags(from, count string) ([]entities.Tag, error) {
 	tags := make([]entities.Tag, 0)
 	for result.Next() {
 		tmp := entities.Tag{}
-		if err := result.Scan(&tmp.Name, &tmp.Description); err != nil {
+		var desc sql.NullString
+		if err := result.Scan(&tmp.Name, &desc); err != nil {
 			return nil, err
 		}
+		tmp.Description = desc.String
 		tags = append(tags, tmp)
 	}
 	return tags, err

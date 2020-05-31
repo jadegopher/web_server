@@ -88,7 +88,7 @@ func (db *DataBase) createDevelopersTable() error {
 		DROP TABLE IF EXISTS developers;
 		CREATE TABLE developers
 		(
-		    user_id VARCHAR(256) NOT NULL,
+		    user_id VARCHAR(256) PRIMARY KEY,
     		FOREIGN KEY (user_id) REFERENCES user_private (user_id) ON DELETE CASCADE
 		);`)
 	return err
@@ -179,12 +179,15 @@ func (db *DataBase) getUserInfo(result *sql.Rows) (*entities.UserInfo, error) {
 	var err error
 	ret := &entities.UserInfo{}
 	var regTime, onlineTime string
+	var pic, bgPic sql.NullString
 
 	if err := result.Scan(&ret.UserId, &ret.FirstName, &ret.LastName, &regTime,
-		&ret.Gender, &onlineTime, &ret.Private, &ret.Picture, &ret.BackgroundPicture); err != nil {
+		&ret.Gender, &onlineTime, &ret.Private, &pic, &bgPic); err != nil {
 		return nil, err
 	}
 
+	ret.Picture = pic.String
+	ret.BackgroundPicture = bgPic.String
 	ret.RegistrationTime, err = time.Parse(time.RFC1123, regTime)
 	if err != nil {
 		return nil, err
@@ -198,10 +201,13 @@ func (db *DataBase) getUserInfo(result *sql.Rows) (*entities.UserInfo, error) {
 
 func (db *DataBase) getTaskInfo(result *sql.Rows) (*entities.Task, error) {
 	ret := &entities.Task{}
+	var pic, bgPic sql.NullString
 	if err := result.Scan(&ret.Name, &ret.Description, &ret.RecommendedTime,
-		&ret.Picture, &ret.BackgroundPicture); err != nil {
+		&pic, &bgPic); err != nil {
 		return nil, err
 	}
+	ret.Picture = pic.String
+	ret.BackgroundPicture = bgPic.String
 	return ret, nil
 }
 
@@ -221,11 +227,16 @@ func (db *DataBase) getQuestsList(result *sql.Rows) ([]entities.Quest, error) {
 	invites := make([]entities.Quest, 0)
 	for result.Next() {
 		tmp := entities.Quest{}
-		if err := result.Scan(&tmp.QuestId, &tmp.UserId, &tmp.TaskName,
-			&tmp.UserOpponent, &tmp.Status, &tmp.StartTime, &tmp.EndTime,
-			&tmp.DeadlineTime); err != nil {
+		var taskName, startTime, endTime, deadlineTime sql.NullString
+		if err := result.Scan(&tmp.QuestId, &tmp.UserId, &taskName,
+			&tmp.UserOpponent, &tmp.Status, &startTime, &endTime,
+			&deadlineTime); err != nil {
 			return nil, err
 		}
+		tmp.TaskName = taskName.String
+		tmp.StartTime = startTime.String
+		tmp.EndTime = endTime.String
+		tmp.DeadlineTime = deadlineTime.String
 		invites = append(invites, tmp)
 	}
 	return invites, nil
