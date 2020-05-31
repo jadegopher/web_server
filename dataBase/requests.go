@@ -296,15 +296,22 @@ func (db *DataBase) GetInvites(userId string) ([]entities.Quest, error) {
 	if err != nil {
 		return nil, err
 	}
-	invites := make([]entities.Quest, 0)
-	for result.Next() {
-		tmp := entities.Quest{}
-		if err := result.Scan(&tmp.QuestId, &tmp.UserId, &tmp.TaskName,
-			&tmp.UserOpponent, &tmp.Status, &tmp.StartTime, &tmp.EndTime,
-			&tmp.DeadlineTime); err != nil {
-			return nil, err
-		}
-		invites = append(invites, tmp)
+	invites, err := db.getQuestsList(result)
+	if err != nil {
+		return nil, err
+	}
+	return invites, nil
+}
+
+func (db *DataBase) GetQuests(userId string) ([]entities.Quest, error) {
+	result, err := db.Connection.Query(`SELECT * FROM quests WHERE 
+		user_id = $1`, userId)
+	if err != nil {
+		return nil, err
+	}
+	invites, err := db.getQuestsList(result)
+	if err != nil {
+		return nil, err
 	}
 	return invites, nil
 }

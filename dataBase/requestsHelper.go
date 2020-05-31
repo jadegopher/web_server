@@ -217,6 +217,20 @@ func (db *DataBase) getTagsList(result *sql.Rows) ([]entities.IdTags, error) {
 	return ret, nil
 }
 
+func (db *DataBase) getQuestsList(result *sql.Rows) ([]entities.Quest, error) {
+	invites := make([]entities.Quest, 0)
+	for result.Next() {
+		tmp := entities.Quest{}
+		if err := result.Scan(&tmp.QuestId, &tmp.UserId, &tmp.TaskName,
+			&tmp.UserOpponent, &tmp.Status, &tmp.StartTime, &tmp.EndTime,
+			&tmp.DeadlineTime); err != nil {
+			return nil, err
+		}
+		invites = append(invites, tmp)
+	}
+	return invites, nil
+}
+
 func (db *DataBase) errorConstructLong(size, name string) error {
 	return errors.New(FieldTooLongError.Error() + size + " bytes for field '" + name + "')")
 }

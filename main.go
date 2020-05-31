@@ -30,7 +30,8 @@ func main() {
 	router.HandleFunc("/tasks/{taskName}", handlers.GetTaskInfo).Methods("GET")
 	router.HandleFunc("/tasks/{taskName}/tags", handlers.GetTaskTags).Methods("GET")
 	router.HandleFunc("/invite/user/{id}", handlers.InviteUser).Methods("POST")
-	router.HandleFunc("/invite/get", handlers.GetInvites).Methods("GET")
+	router.HandleFunc("/invite/show", handlers.GetInvites).Methods("GET")
+	router.HandleFunc("/quests/show", handlers.GetQuests).Methods("GET")
 	//For developers
 	router.HandleFunc("/developers/getAccount", handlers.GetDeveloperAccount).Methods("GET")
 	router.HandleFunc("/developers/postTag", handlers.PostTag).Methods("POST")

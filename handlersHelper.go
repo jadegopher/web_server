@@ -245,6 +245,20 @@ func (handler *Handlers) getInvitesHelper(w http.ResponseWriter, r *http.Request
 	return nil
 }
 
+func (handler *Handlers) getQuestsHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateSession(r); err != nil {
+		return err
+	}
+	invites, err := handler.DataBase.GetQuests(r.Header.Get(userIdField))
+	if err != nil {
+		return err
+	}
+	if err := json.NewEncoder(w).Encode(toAnswer(invites, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (handler *Handlers) getDeveloperAccountHelper(w http.ResponseWriter, r *http.Request) error {
 	if err := handler.validateSession(r); err != nil {
 		return err
