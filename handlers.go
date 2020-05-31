@@ -114,6 +114,16 @@ func (handler *Handlers) GetTaskTags(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (handler *Handlers) InviteUser(w http.ResponseWriter, r *http.Request) {
+	var err error
+	if err = handler.inviteUserHelper(w, r); err != nil {
+		handler.defaultErrorResponse(w, err)
+	}
+	if handler.Log {
+		handler.addLog(r, "InviteUser", err)
+	}
+}
+
 func (handler *Handlers) GetDeveloperAccount(w http.ResponseWriter, r *http.Request) {
 	var err error
 	if err = handler.getDeveloperAccountHelper(w, r); err != nil {

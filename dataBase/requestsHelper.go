@@ -32,6 +32,9 @@ func (db *DataBase) createNewDataBase() error {
 	if err := db.createTaskTagsTable(); err != nil {
 		return err
 	}
+	if err := db.createQuestsTable(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -136,6 +139,26 @@ func (db *DataBase) createTaskTagsTable() error {
     		rating INTEGER NOT NULL,
     		FOREIGN KEY (task_name) REFERENCES tasks (task_name) ON DELETE CASCADE,
     		FOREIGN KEY (tag_name) REFERENCES tags (tag_name) ON DELETE CASCADE
+		);`)
+	return err
+}
+
+func (db *DataBase) createQuestsTable() error {
+	_, err := db.Connection.Exec(`
+		DROP TABLE IF EXISTS quests;
+		CREATE TABLE quests
+		(
+    		quest_id      BIGSERIAL PRIMARY KEY,
+    		user_id       VARCHAR(256) NOT NULL,
+    		task_name     VARCHAR(50),
+    		user_opponent VARCHAR(256) NOT NULL,
+    		status        INTEGER 	   NOT NULL,
+    		start_time    VARCHAR(256),
+    		end_time      VARCHAR(256),
+    		deadline_time VARCHAR(256),
+    		FOREIGN KEY (user_id) REFERENCES user_private (user_id) ON DELETE CASCADE,
+    		FOREIGN KEY (user_opponent) REFERENCES user_private (user_id) ON DELETE CASCADE,
+    		FOREIGN KEY (task_name) REFERENCES tasks (task_name) ON DELETE CASCADE
 		);`)
 	return err
 }

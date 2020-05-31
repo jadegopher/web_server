@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"time"
 	"web_server/entities"
 )
@@ -38,15 +37,10 @@ func (handler *Handlers) registrationHelper(w http.ResponseWriter, r *http.Reque
 }
 
 func (handler *Handlers) loginHelper(w http.ResponseWriter, r *http.Request) error {
-	data, err := ioutil.ReadAll(r.Body)
+	data, err := handler.copyBody(r)
 	if err != nil {
 		return err
 	}
-	err = r.Body.Close()
-	if err != nil {
-		return err
-	}
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
 	userInfo := &entities.Login{}
 	if err = json.Unmarshal(data, userInfo); err != nil {
 		return err
@@ -109,15 +103,10 @@ func (handler *Handlers) deleteUserHelper(w http.ResponseWriter, r *http.Request
 	if err := handler.validateSession(r); err != nil {
 		return err
 	}
-	data, err := ioutil.ReadAll(r.Body)
+	data, err := handler.copyBody(r)
 	if err != nil {
 		return err
 	}
-	err = r.Body.Close()
-	if err != nil {
-		return err
-	}
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
 	userInfo := &entities.Login{}
 	if err = json.Unmarshal(data, userInfo); err != nil {
 		return err
@@ -160,15 +149,10 @@ func (handler *Handlers) addTagsToUserHelper(w http.ResponseWriter, r *http.Requ
 	if err := handler.validateSession(r); err != nil {
 		return err
 	}
-	data, err := ioutil.ReadAll(r.Body)
+	data, err := handler.copyBody(r)
 	if err != nil {
 		return err
 	}
-	err = r.Body.Close()
-	if err != nil {
-		return err
-	}
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
 	var tags []entities.Tag
 	if err = json.Unmarshal(data, &tags); err != nil {
 		return err
@@ -228,6 +212,20 @@ func (handler *Handlers) getTaskTagsHelper(w http.ResponseWriter, r *http.Reques
 		return err
 	}
 	if err := json.NewEncoder(w).Encode(toAnswer(tags, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (handler Handlers) inviteUserHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateSession(r); err != nil {
+		return err
+	}
+	parameters := mux.Vars(r)
+	if err := handler.DataBase.InviteUser(r.Header.Get(userIdField), parameters["id"]); err != nil {
+		return err
+	}
+	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
 		return err
 	}
 	return nil
@@ -309,15 +307,10 @@ func (handler *Handlers) addTagsToTaskHelper(w http.ResponseWriter, r *http.Requ
 	if err := handler.validateDeveloperSession(r); err != nil {
 		return err
 	}
-	data, err := ioutil.ReadAll(r.Body)
+	data, err := handler.copyBody(r)
 	if err != nil {
 		return err
 	}
-	err = r.Body.Close()
-	if err != nil {
-		return err
-	}
-	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
 	var tags []entities.Tag
 	if err := json.Unmarshal(data, &tags); err != nil {
 		return err
@@ -327,29 +320,6 @@ func (handler *Handlers) addTagsToTaskHelper(w http.ResponseWriter, r *http.Requ
 		return err
 	}
 	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (handler *Handlers) validateSession(r *http.Request) error {
-	sessionId := r.Header.Get(sessionIdField)
-	userId := r.Header.Get(userIdField)
-	_, err := handler.DataBase.GetUserInfo(userId, true)
-	if err != nil {
-		return err
-	}
-	if sessionId != getSessionId(userId) {
-		return invalidSessionError
-	}
-	return nil
-}
-
-func (handler *Handlers) validateDeveloperSession(r *http.Request) error {
-	if err := handler.validateSession(r); err != nil {
-		return err
-	}
-	if err := handler.DataBase.CheckDeveloper(r.Header.Get(userIdField)); err != nil {
 		return err
 	}
 	return nil
@@ -402,14 +372,17 @@ func (handler *Handlers) addLog(r *http.Request, reqName string, userErr error) 
 	}
 }
 
-func (handler *Handlers) validateFromCountFields(query url.Values) error {
-	if _, in := query[fromField]; !in {
-		return handler.errorConstructNotFound(fieldNotFoundError, fromField)
+func (handler *Handlers) copyBody(r *http.Request) ([]byte, error) {
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return nil, err
 	}
-	if _, in := query[countField]; !in {
-		return handler.errorConstructNotFound(fieldNotFoundError, countField)
+	err = r.Body.Close()
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
+	return data, nil
 }
 
 func (handler *Handlers) errorConstructNotFound(err error, name string) error {

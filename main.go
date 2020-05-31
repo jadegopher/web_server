@@ -29,6 +29,7 @@ func main() {
 	router.HandleFunc("/tags/get/{id}", handlers.GetUserTags).Methods("GET")
 	router.HandleFunc("/tasks/{taskName}", handlers.GetTaskInfo).Methods("GET")
 	router.HandleFunc("/tasks/{taskName}/tags", handlers.GetTaskTags).Methods("GET")
+	router.HandleFunc("/invite/{id}", handlers.InviteUser).Methods("POST")
 	//For developers
 	router.HandleFunc("/developers/getAccount", handlers.GetDeveloperAccount).Methods("GET")
 	router.HandleFunc("/developers/postTag", handlers.PostTag).Methods("POST")
