@@ -263,6 +263,27 @@ func (handler *Handlers) getQuestsHelper(w http.ResponseWriter, r *http.Request)
 	return nil
 }
 
+func (handler *Handlers) changeQuestStatusHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateSession(r); err != nil {
+		return err
+	}
+	data, err := handler.copyBody(r)
+	if err != nil {
+		return err
+	}
+	questInfo := &entities.Quest{}
+	if err := json.Unmarshal(data, questInfo); err != nil {
+		return err
+	}
+	if err := handler.DataBase.ChangeQuestStatus(r.Header.Get(userIdField), *questInfo); err != nil {
+		return err
+	}
+	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (handler *Handlers) getDeveloperAccountHelper(w http.ResponseWriter, r *http.Request) error {
 	if err := handler.validateSession(r); err != nil {
 		return err
@@ -323,7 +344,7 @@ func (handler *Handlers) postTaskHelper(w http.ResponseWriter, r *http.Request) 
 	if err = json.Unmarshal(data, taskInfo); err != nil {
 		return err
 	}
-	if _, err := time.Parse(taskInfo.RecommendedTime, time.Time{}.Format(time.RFC1123)); err != nil {
+	if _, err := time.Parse(time.RFC1123, taskInfo.RecommendedTime); err != nil {
 		return err
 	}
 	if err = handler.DataBase.AddTask(taskInfo); err != nil {

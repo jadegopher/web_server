@@ -1,29 +1,28 @@
 package dataBase
 
-import "errors"
-
 type Status int
 
 const (
 	Pending Status = iota
+	Rejected
 	NotSelected
 	Selected
 	Started
 	Waiting
-	NotAccepted
 	Accepted
+	NotAccepted
 	Expired
 )
 
 func (s Status) String() string {
-	return [...]string{"Pending", "Not selected", "Selected", "Started",
-		"Waiting", "Not accepted", "Accepted", "Expired"}[s]
+	return [...]string{"Pending", "Rejected", "Not selected", "Selected", "Started",
+		"Waiting", "Accepted", "Not accepted", "Expired"}[s]
 }
 
-func (s Status) IsValid() error {
+func (s Status) IsValid() bool {
 	switch s {
-	case Pending, NotSelected, Selected, Started, Waiting, NotAccepted, Accepted, Expired:
-		return nil
+	case Pending, NotSelected, Selected, Started, Waiting, NotAccepted, Accepted, Expired, Rejected:
+		return true
 	}
-	return errors.New(WrongValueError.Error() + `status`)
+	return false
 }

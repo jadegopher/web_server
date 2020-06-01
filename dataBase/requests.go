@@ -276,8 +276,8 @@ func (db *DataBase) InviteUser(user, userOpponent string) error {
 	}
 	result, err := db.Connection.Query(`SELECT *
 		FROM quests
-		WHERE (user_id = $1 AND user_opponent = $2)
-  		OR (user_id = $2 AND user_opponent = $1)	
+		WHERE ((user_id = $1 AND user_opponent = $2)
+  		OR (user_id = $2 AND user_opponent = $1))	
   		AND status = $3;`, user, userOpponent, Pending)
 	if err != nil {
 		return err
@@ -326,6 +326,42 @@ func (db *DataBase) GetQuests(userId, status string) ([]entities.Quest, error) {
 		return nil, err
 	}
 	return invites, nil
+}
+
+func (db *DataBase) ChangeQuestStatus(userId string, quest entities.Quest) error {
+	userStatus := Status(quest.Status)
+	if !userStatus.IsValid() {
+		return QuestStatusError
+	}
+	switch userStatus {
+	case Rejected:
+		if err := db.changeToRejected(userId, quest.QuestId); err != nil {
+			return err
+		}
+	case NotSelected:
+		if err := db.changeToNotSelected(userId, quest.QuestId); err != nil {
+			return err
+		}
+	case Started:
+		if err := db.changeToStarted(userId, quest.QuestId); err != nil {
+			return err
+		}
+	case Waiting:
+		if err := db.changeToWaiting(userId, quest.QuestId); err != nil {
+			return err
+		}
+	case Accepted:
+		if err := db.changeToAccepted(userId, quest.QuestId); err != nil {
+			return err
+		}
+	case NotAccepted:
+		if err := db.changeToNotAccepted(userId, quest.QuestId); err != nil {
+			return err
+		}
+	default:
+		return QuestStatusError
+	}
+	return nil
 }
 
 func (db *DataBase) AddDeveloper(userId string) error {

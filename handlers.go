@@ -144,6 +144,16 @@ func (handler *Handlers) GetQuests(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (handler *Handlers) ChangeQuestStatus(w http.ResponseWriter, r *http.Request) {
+	var err error
+	if err = handler.changeQuestStatusHelper(w, r); err != nil {
+		handler.defaultErrorResponse(w, err)
+	}
+	if handler.Log {
+		handler.addLog(r, "ChangeQuestStatus", err)
+	}
+}
+
 func (handler *Handlers) GetDeveloperAccount(w http.ResponseWriter, r *http.Request) {
 	var err error
 	if err = handler.getDeveloperAccountHelper(w, r); err != nil {

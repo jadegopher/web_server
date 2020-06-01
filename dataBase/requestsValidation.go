@@ -57,7 +57,10 @@ func (db *DataBase) validateUserInfo(userInfo *entities.Registration) error {
 		return err
 	}
 	rowsAffected, err := result.RowsAffected()
-	if err != nil || rowsAffected == 1 {
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 1 {
 		return NicknameUniqueError
 	}
 	result, err = db.Connection.Exec("SELECT email FROM user_private WHERE email = $1", userInfo.UserPrivate.Email)
@@ -65,7 +68,10 @@ func (db *DataBase) validateUserInfo(userInfo *entities.Registration) error {
 		return err
 	}
 	rowsAffected, err = result.RowsAffected()
-	if err != nil || rowsAffected == 1 {
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 1 {
 		return EmailUniqueError
 	}
 	return nil
@@ -83,7 +89,10 @@ func (db *DataBase) validateTag(tag *entities.Tag) error {
 		return err
 	}
 	rowsAffected, err := result.RowsAffected()
-	if err != nil || rowsAffected == 1 {
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 1 {
 		return TagUniqueError
 	}
 	return nil
@@ -110,7 +119,10 @@ func (db *DataBase) validateTask(task *entities.Task) error {
 		return err
 	}
 	rowsAffected, err := result.RowsAffected()
-	if err != nil || rowsAffected == 1 {
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 1 {
 		return TaskUniqueError
 	}
 	return nil

@@ -32,6 +32,7 @@ func main() {
 	router.HandleFunc("/invite/user/{id}", handlers.InviteUser).Methods("POST")
 	router.HandleFunc("/invite/show", handlers.GetInvites).Methods("GET")
 	router.HandleFunc("/quests/show", handlers.GetQuests).Methods("GET")
+	router.HandleFunc("/quest/status/change", handlers.ChangeQuestStatus).Methods("POST")
 	//For developers
 	router.HandleFunc("/developers/getAccount", handlers.GetDeveloperAccount).Methods("GET")
 	router.HandleFunc("/developers/postTag", handlers.PostTag).Methods("POST")

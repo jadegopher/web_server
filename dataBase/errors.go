@@ -17,4 +17,8 @@ var (
 	FieldNotFoundError    = errors.New("111 field with name ")
 	InviteExistsError     = errors.New("112 invite has already existed")
 	InviteToYourselfError = errors.New("113 you can't invite yourself")
+	QuestStatusError      = errors.New("114 wrong status")
+	QuestNotFoundError    = errors.New("115 quest not found error")
+	AppendError           = errors.New("116 append error")
+	ExpiredTaskError      = errors.New("117 task expired")
 )

@@ -2,11 +2,11 @@ package main
 
 const (
 	success        = "success"
-	sessionIdField = "session_id"
+	sessionIdField = "Session_id"
 	dataBaseField  = "dataBase"
 	logField       = "log"
-	userIdField    = "user_id"
-	developerField = "dev_secret"
+	userIdField    = "User_id"
+	developerField = "Dev_secret"
 	fromField      = "from"
 	countField     = "count"
 	queryField     = "query"
