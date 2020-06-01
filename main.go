@@ -31,6 +31,7 @@ func main() {
 	router.HandleFunc("/tasks/{taskName}/tags", handlers.GetTaskTags).Methods("GET")
 	router.HandleFunc("/invite/user/{id}", handlers.InviteUser).Methods("POST")
 	router.HandleFunc("/invite/show", handlers.GetInvites).Methods("GET")
+	router.HandleFunc("/validate/show", handlers.GetTasksToValidate).Methods("GET")
 	router.HandleFunc("/quests/show", handlers.GetQuests).Methods("GET")
 	router.HandleFunc("/quest/status/change", handlers.ChangeQuestStatus).Methods("POST")
 	//For developers

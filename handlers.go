@@ -134,6 +134,16 @@ func (handler *Handlers) GetInvites(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (handler *Handlers) GetTasksToValidate(w http.ResponseWriter, r *http.Request) {
+	var err error
+	if err = handler.getTasksToValidateHelper(w, r); err != nil {
+		handler.defaultErrorResponse(w, err)
+	}
+	if handler.Log {
+		handler.addLog(r, "GetTasksRoValidate", err)
+	}
+}
+
 func (handler *Handlers) GetQuests(w http.ResponseWriter, r *http.Request) {
 	var err error
 	if err = handler.getQuestsHelper(w, r); err != nil {

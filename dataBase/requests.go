@@ -292,9 +292,9 @@ func (db *DataBase) InviteUser(user, userOpponent string) error {
 	return nil
 }
 
-func (db *DataBase) GetInvites(userId string) ([]entities.Quest, error) {
+func (db *DataBase) GetTasks(userId string, status Status) ([]entities.Quest, error) {
 	result, err := db.Connection.Query(`SELECT * FROM quests WHERE 
-		user_opponent = $1 AND status = $2`, userId, Pending)
+		user_opponent = $1 AND status = $2`, userId, status)
 	if err != nil {
 		return nil, err
 	}

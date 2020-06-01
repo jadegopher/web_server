@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"web_server/dataBase"
 	"web_server/entities"
 )
 
@@ -238,11 +239,25 @@ func (handler *Handlers) getInvitesHelper(w http.ResponseWriter, r *http.Request
 	if err := handler.validateSession(r); err != nil {
 		return err
 	}
-	invites, err := handler.DataBase.GetInvites(r.Header.Get(userIdField))
+	invites, err := handler.DataBase.GetTasks(r.Header.Get(userIdField), dataBase.Pending)
 	if err != nil {
 		return err
 	}
 	if err := json.NewEncoder(w).Encode(toAnswer(invites, nil)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (handler *Handlers) getTasksToValidateHelper(w http.ResponseWriter, r *http.Request) error {
+	if err := handler.validateSession(r); err != nil {
+		return err
+	}
+	validates, err := handler.DataBase.GetTasks(r.Header.Get(userIdField), dataBase.Waiting)
+	if err != nil {
+		return err
+	}
+	if err := json.NewEncoder(w).Encode(toAnswer(validates, nil)); err != nil {
 		return err
 	}
 	return nil
