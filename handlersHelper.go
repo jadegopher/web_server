@@ -30,6 +30,8 @@ func (handler *Handlers) registrationHelper(w http.ResponseWriter, r *http.Reque
 	if err = handler.DataBase.AddUser(userInfo); err != nil {
 		return err
 	}
+	w.Header().Set(userIdField, userInfo.UserPrivate.UserId)
+	w.Header().Set(sessionIdField, getSessionId(userInfo.UserPrivate.UserId))
 	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
 		return err
 	}
@@ -49,6 +51,7 @@ func (handler *Handlers) loginHelper(w http.ResponseWriter, r *http.Request) err
 	if err != nil {
 		return err
 	}
+	w.Header().Set(userIdField, userId)
 	w.Header().Set(sessionIdField, getSessionId(userId))
 	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
 		return err
