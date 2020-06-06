@@ -348,7 +348,7 @@ func (db *DataBase) changeToStarted(userId string, questId int) error {
 	deadlineTime = deadlineTime.Add(time.Minute * time.Duration(plus.Second()))
 	deadlineTime = deadlineTime.Add(time.Minute * time.Duration(plus.Nanosecond()))
 	year, month, day := plus.Date()
-	deadlineTime = deadlineTime.AddDate(day-1, int(month)-1, year-1)
+	deadlineTime = deadlineTime.AddDate(year-1, int(month)-1, day-1)
 	exec, err := db.Connection.Exec(`UPDATE quests SET start_time = $1,
         deadline_time = $2, status = $3 WHERE quest_id = $4`,
 		startTime.Format(time.RFC1123), deadlineTime.Format(time.RFC1123), Started, questId)

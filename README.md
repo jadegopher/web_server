@@ -33,6 +33,28 @@
 
 `hostname/search "GET"` - запрос на поиск пользователей
 
+`hostname/delete "POST"` - запрос на удаление аккаунта
+
+`hostname/tags "GET"` - запрос на получение всех тэгов
+
+`hostname/tags/add "POST"` - запрос на добавление себе тэгов
+
+`hostname/tags/get/{id} "GET"` - запрос на получение тэгов пользователя
+
+`hostname/tasks/{taskName} "GET"` - запрос на получение информации о задании
+
+`hostname/tasks/{taskName}/tags "GET"` - запрос на получение
+
+router.HandleFunc("/invite/user/{id}", handlers.InviteUser).Methods("POST")
+
+router.HandleFunc("/invite/show", handlers.GetInvites).Methods("GET")
+
+router.HandleFunc("/validate/show", handlers.GetTasksToValidate).Methods("GET")
+
+router.HandleFunc("/quests/show", handlers.GetQuests).Methods("GET")
+
+router.HandleFunc("/quest/status/change", handlers.ChangeQuestStatus).Methods("POST")
+
 А так же несколько запросов для разработчиков:
 
 `hostname/developers/getAccount "GET"` - запрос на получение аккаунта разработчика 
