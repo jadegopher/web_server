@@ -19,7 +19,7 @@ func main() {
 
 	router := mux.NewRouter()
 	handlers := NewHandlers(db, config[logField].(bool))
-	staticDir := "/"
+	staticDir := "/build/"
 	router.PathPrefix(staticDir).Handler(http.StripPrefix(staticDir, http.FileServer(http.Dir("."+staticDir))))
 
 	router.HandleFunc("/registration", handlers.Registration).Methods("POST")
@@ -42,5 +42,9 @@ func main() {
 	router.HandleFunc("/developers/postTag", handlers.PostTag).Methods("POST")
 	router.HandleFunc("/developers/tasks/post", handlers.PostTask).Methods("POST")
 	router.HandleFunc("/developers/tasks/addTags/{taskName}", handlers.AddTagsToTask).Methods("POST")
-	log.Fatal(http.ListenAndServe(":8000", router))
+
+	err = http.ListenAndServeTLS(":443", "certs/cert.pem", "certs/key.pem", router)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
 }
