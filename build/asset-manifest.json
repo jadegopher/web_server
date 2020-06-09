@@ -1,0 +1,41 @@
+{
+  "files": {
+    "main.css": "/static/css/main.5f361e03.chunk.css",
+    "main.js": "/static/js/main.99212896.chunk.js",
+    "main.js.map": "/static/js/main.99212896.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.39ce168c.js",
+    "runtime-main.js.map": "/static/js/runtime-main.39ce168c.js.map",
+    "static/css/2.508070a3.chunk.css": "/static/css/2.508070a3.chunk.css",
+    "static/js/2.4113897f.chunk.js": "/static/js/2.4113897f.chunk.js",
+    "static/js/2.4113897f.chunk.js.map": "/static/js/2.4113897f.chunk.js.map",
+    "index.html": "/index.html",
+    "precache-manifest.d1b442cf4afb838173bea328d82e5c3d.js": "/precache-manifest.d1b442cf4afb838173bea328d82e5c3d.js",
+    "service-worker.js": "/service-worker.js",
+    "static/css/2.508070a3.chunk.css.map": "/static/css/2.508070a3.chunk.css.map",
+    "static/css/main.5f361e03.chunk.css.map": "/static/css/main.5f361e03.chunk.css.map",
+    "static/js/2.4113897f.chunk.js.LICENSE.txt": "/static/js/2.4113897f.chunk.js.LICENSE.txt",
+    "static/media/CompletedTask.svg": "/static/media/CompletedTask.a7d8a846.svg",
+    "static/media/Danya.webp": "/static/media/Danya.20c155e9.webp",
+    "static/media/Nastya.jpg": "/static/media/Nastya.5a426a55.jpg",
+    "static/media/Pavel.jpg": "/static/media/Pavel.c0b470e4.jpg",
+    "static/media/Sasha.jpg": "/static/media/Sasha.6b3b4b99.jpg",
+    "static/media/Zhenya.jpg": "/static/media/Zhenya.8009984a.jpg",
+    "static/media/loginIcon.svg": "/static/media/loginIcon.25c29521.svg",
+    "static/media/nikita.jpg": "/static/media/nikita.483fd002.jpg",
+    "static/media/on_boarding1.svg": "/static/media/on_boarding1.c3e8bafa.svg",
+    "static/media/on_boarding2.svg": "/static/media/on_boarding2.e15c8694.svg",
+    "static/media/on_boarding3.svg": "/static/media/on_boarding3.271efdc9.svg",
+    "static/media/onas.svg": "/static/media/onas.3e2f20bf.svg",
+    "static/media/profileTask.svg": "/static/media/profileTask.4b300573.svg",
+    "static/media/registrationIcon.svg": "/static/media/registrationIcon.24a68afc.svg",
+    "static/media/secur.svg": "/static/media/secur.156f46b2.svg",
+    "static/media/vopsos1.svg": "/static/media/vopsos1.8ab1e6a4.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.39ce168c.js",
+    "static/css/2.508070a3.chunk.css",
+    "static/js/2.4113897f.chunk.js",
+    "static/css/main.5f361e03.chunk.css",
+    "static/js/main.99212896.chunk.js"
+  ]
+}

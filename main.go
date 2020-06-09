@@ -19,10 +19,8 @@ func main() {
 
 	router := mux.NewRouter()
 	handlers := NewHandlers(db, config[logField].(bool))
-	staticDir := "/static/"
-	router.
-		PathPrefix(staticDir).
-		Handler(http.StripPrefix(staticDir, http.FileServer(http.Dir("."+staticDir))))
+	staticDir := "/build/"
+	router.PathPrefix(staticDir).Handler(http.StripPrefix(staticDir, http.FileServer(http.Dir("."+staticDir))))
 
 	router.HandleFunc("/registration", handlers.Registration).Methods("POST")
 	router.HandleFunc("/login", handlers.Login).Methods("POST")
