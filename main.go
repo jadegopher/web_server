@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/tls"
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/acme/autocert"
 	"log"
 	"net/http"
 	"web_server/dataBase"
@@ -16,11 +18,15 @@ func main() {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
-
+	certManager := autocert.Manager{
+		Prompt:     autocert.AcceptTOS,
+		HostPolicy: autocert.HostWhitelist("meet-go.me"), //Your domain here
+		Cache:      autocert.DirCache("certs"),           //Folder for storing certificates
+	}
 	router := mux.NewRouter()
 	handlers := NewHandlers(db, config[logField].(bool))
 	staticDir := "/"
-	router.PathPrefix(staticDir).Handler(http.StripPrefix(staticDir, http.FileServer(http.Dir("."+staticDir))))
+	go router.PathPrefix(staticDir).Handler(http.StripPrefix(staticDir, http.FileServer(http.Dir("."+staticDir))))
 
 	router.HandleFunc("/registration", handlers.Registration).Methods("POST")
 	router.HandleFunc("/login", handlers.Login).Methods("POST")
@@ -42,5 +48,15 @@ func main() {
 	router.HandleFunc("/developers/postTag", handlers.PostTag).Methods("POST")
 	router.HandleFunc("/developers/tasks/post", handlers.PostTask).Methods("POST")
 	router.HandleFunc("/developers/tasks/addTags/{taskName}", handlers.AddTagsToTask).Methods("POST")
-	log.Fatal(http.ListenAndServe(":8000", router))
+
+	server := &http.Server{
+		Addr: ":https",
+		TLSConfig: &tls.Config{
+			GetCertificate: certManager.GetCertificate,
+		},
+	}
+
+	go http.ListenAndServe(":http", certManager.HTTPHandler(nil))
+
+	log.Fatal(server.ListenAndServeTLS("", ""))
 }
