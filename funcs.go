@@ -25,6 +25,9 @@ func getConfig(path string) (map[string]interface{}, error) {
 	tmp := &dataBase.DBConfig{}
 	ret[dataBaseField], err = getModule(cfg[dataBaseField], tmp)
 	ret[logField] = cfg[logField]
+	ret[staticDirField] = cfg[staticDirField]
+	ret[certFilePathField] = cfg["cert"].(map[string]interface{})[certFilePathField]
+	ret[keyFilePathField] = cfg["cert"].(map[string]interface{})[keyFilePathField]
 	return ret, nil
 }
 
