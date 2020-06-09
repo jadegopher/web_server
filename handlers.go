@@ -16,7 +16,6 @@ func NewHandlers(db *dataBase.DataBase, log bool) *Handlers {
 
 func (handler *Handlers) Registration(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.registrationHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -27,7 +26,6 @@ func (handler *Handlers) Registration(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) Login(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.loginHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -38,7 +36,6 @@ func (handler *Handlers) Login(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.getUserInfoHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -49,7 +46,6 @@ func (handler *Handlers) GetUserInfo(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) SearchUser(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.searchUserHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -60,7 +56,6 @@ func (handler *Handlers) SearchUser(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.deleteUserHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -71,7 +66,6 @@ func (handler *Handlers) DeleteUser(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) GetTags(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.getTagsHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -82,7 +76,6 @@ func (handler *Handlers) GetTags(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) AddTagsToUser(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.addTagsToUserHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -93,7 +86,6 @@ func (handler *Handlers) AddTagsToUser(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) GetUserTags(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.getUserTagsHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -104,7 +96,6 @@ func (handler *Handlers) GetUserTags(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) GetTaskInfo(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.getTaskInfoHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -115,7 +106,6 @@ func (handler *Handlers) GetTaskInfo(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) GetTaskTags(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.getTaskTagsHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -126,7 +116,6 @@ func (handler *Handlers) GetTaskTags(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) InviteUser(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.inviteUserHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -137,7 +126,6 @@ func (handler *Handlers) InviteUser(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) GetInvites(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.getInvitesHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -148,7 +136,6 @@ func (handler *Handlers) GetInvites(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) GetTasksToValidate(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.getTasksToValidateHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -159,7 +146,6 @@ func (handler *Handlers) GetTasksToValidate(w http.ResponseWriter, r *http.Reque
 
 func (handler *Handlers) GetQuests(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.getQuestsHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -170,7 +156,6 @@ func (handler *Handlers) GetQuests(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) ChangeQuestStatus(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.changeQuestStatusHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -181,7 +166,6 @@ func (handler *Handlers) ChangeQuestStatus(w http.ResponseWriter, r *http.Reques
 
 func (handler *Handlers) GetDeveloperAccount(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.getDeveloperAccountHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -192,7 +176,6 @@ func (handler *Handlers) GetDeveloperAccount(w http.ResponseWriter, r *http.Requ
 
 func (handler *Handlers) PostTag(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.postTagHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -203,7 +186,6 @@ func (handler *Handlers) PostTag(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) PostTask(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.postTaskHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
@@ -214,7 +196,6 @@ func (handler *Handlers) PostTask(w http.ResponseWriter, r *http.Request) {
 
 func (handler *Handlers) AddTagsToTask(w http.ResponseWriter, r *http.Request) {
 	var err error
-	handler.setDefaultHandlers(w)
 	if err = handler.addTagsToTaskHelper(w, r); err != nil {
 		handler.defaultErrorResponse(w, err)
 	}
