@@ -12,6 +12,7 @@ const (
 	developerField    = "Dev_secret"
 	fromField         = "from"
 	countField        = "count"
+	taskNameField     = "task"
 	queryField        = "query"
 	statusField       = "status"
 )

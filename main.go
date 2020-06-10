@@ -29,8 +29,8 @@ func main() {
 	router.HandleFunc("/tags", handlers.GetTags).Methods("GET")
 	router.HandleFunc("/tags/add", handlers.AddTagsToUser).Methods("POST")
 	router.HandleFunc("/tags/get/{id}", handlers.GetUserTags).Methods("GET")
-	router.HandleFunc("/tasks/{taskName}", handlers.GetTaskInfo).Methods("GET")
-	router.HandleFunc("/tasks/{taskName}/tags", handlers.GetTaskTags).Methods("GET")
+	router.HandleFunc("/tasks", handlers.GetTaskInfo).Methods("GET")
+	router.HandleFunc("/tasks/tags", handlers.GetTaskTags).Methods("GET")
 	router.HandleFunc("/invite/user/{id}", handlers.InviteUser).Methods("POST")
 	router.HandleFunc("/invite/show", handlers.GetInvites).Methods("GET")
 	router.HandleFunc("/validate/show", handlers.GetTasksToValidate).Methods("GET")
@@ -40,7 +40,7 @@ func main() {
 	router.HandleFunc("/developers/getAccount", handlers.GetDeveloperAccount).Methods("GET")
 	router.HandleFunc("/developers/postTag", handlers.PostTag).Methods("POST")
 	router.HandleFunc("/developers/tasks/post", handlers.PostTask).Methods("POST")
-	router.HandleFunc("/developers/tasks/addTags/{taskName}", handlers.AddTagsToTask).Methods("POST")
+	router.HandleFunc("/developers/tasks/addTags", handlers.AddTagsToTask).Methods("POST")
 
 	go router.PathPrefix(staticDir).Handler(http.StripPrefix(staticDir, http.FileServer(http.Dir("."+staticDir))))
 

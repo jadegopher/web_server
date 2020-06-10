@@ -6,7 +6,6 @@ const (
 	Pending Status = iota
 	Rejected
 	NotSelected
-	Selected
 	Started
 	Waiting
 	Accepted
@@ -15,13 +14,13 @@ const (
 )
 
 func (s Status) String() string {
-	return [...]string{"Pending", "Rejected", "Not selected", "Selected", "Started",
+	return [...]string{"Pending", "Rejected", "Not selected", "Started",
 		"Waiting", "Accepted", "Not accepted", "Expired"}[s]
 }
 
 func (s Status) IsValid() bool {
 	switch s {
-	case Pending, NotSelected, Selected, Started, Waiting, NotAccepted, Accepted, Expired, Rejected:
+	case Pending, NotSelected, Started, Waiting, NotAccepted, Accepted, Expired, Rejected:
 		return true
 	}
 	return false

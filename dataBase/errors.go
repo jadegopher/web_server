@@ -21,4 +21,5 @@ var (
 	QuestNotFoundError    = errors.New("115 quest not found error")
 	AppendError           = errors.New("116 append error")
 	ExpiredTaskError      = errors.New("117 task expired")
+	NoTasksOnServerError  = errors.New("118 can't find any task")
 )

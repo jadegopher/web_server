@@ -327,14 +327,14 @@ func (db *DataBase) changeToNotSelected(userId string, questId int) error {
 }
 
 func (db *DataBase) changeToStarted(userId string, questId int) error {
-	quest, err := db.findQuestWhereInitiator(userId, questId, Selected)
+	_, err := db.findQuestWhereInitiator(userId, questId, NotSelected)
 	if err != nil {
 		return err
 	}
 	if err := db.updateQuest(questId, Started); err != nil {
 		return err
 	}
-	task, err := db.GetTaskInfo(quest.TaskName)
+	task, err := db.getRandomTask()
 	if err != nil {
 		return err
 	}
@@ -349,9 +349,9 @@ func (db *DataBase) changeToStarted(userId string, questId int) error {
 	deadlineTime = deadlineTime.Add(time.Minute * time.Duration(plus.Nanosecond()))
 	year, month, day := plus.Date()
 	deadlineTime = deadlineTime.AddDate(year-1, int(month)-1, day-1)
-	exec, err := db.Connection.Exec(`UPDATE quests SET start_time = $1,
-        deadline_time = $2, status = $3 WHERE quest_id = $4`,
-		startTime.Format(time.RFC1123), deadlineTime.Format(time.RFC1123), Started, questId)
+	exec, err := db.Connection.Exec(`UPDATE quests SET task_name = $1, start_time = $2,
+        deadline_time = $3, status = $4 WHERE quest_id = $5`,
+		task.Name, startTime.Format(time.RFC1123), deadlineTime.Format(time.RFC1123), Started, questId)
 	if err != nil {
 		return err
 	}
@@ -363,6 +363,23 @@ func (db *DataBase) changeToStarted(userId string, questId int) error {
 		return AppendError
 	}
 	return nil
+}
+
+func (db *DataBase) getRandomTask() (*entities.Task, error) {
+	result, err := db.Connection.Query("SELECT * FROM tasks ORDER BY random() LIMIT 1")
+	if err != nil {
+		return nil, err
+	}
+	ret := &entities.Task{}
+	if result.Next() {
+		ret, err = db.getTaskInfo(result)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, NoTasksOnServerError
+	}
+	return ret, nil
 }
 
 func (db *DataBase) changeToWaiting(userId string, questId int) error {

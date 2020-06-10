@@ -197,8 +197,11 @@ func (handler *Handlers) getTaskInfoHelper(w http.ResponseWriter, r *http.Reques
 	if err := handler.validateSession(r); err != nil {
 		return err
 	}
-	parameters := mux.Vars(r)
-	task, err := handler.DataBase.GetTaskInfo(parameters["taskName"])
+	query := r.URL.Query()
+	if _, in := query[taskNameField]; !in {
+		return handler.errorConstructNotFound(fieldNotFoundError, taskNameField)
+	}
+	task, err := handler.DataBase.GetTaskInfo(query[taskNameField][0])
 	if err != nil {
 		return err
 	}
@@ -212,8 +215,11 @@ func (handler *Handlers) getTaskTagsHelper(w http.ResponseWriter, r *http.Reques
 	if err := handler.validateSession(r); err != nil {
 		return err
 	}
-	parameters := mux.Vars(r)
-	tags, err := handler.DataBase.GetTaskTags(parameters["taskName"])
+	query := r.URL.Query()
+	if _, in := query[taskNameField]; !in {
+		return handler.errorConstructNotFound(fieldNotFoundError, taskNameField)
+	}
+	tags, err := handler.DataBase.GetTaskTags(query[taskNameField][0])
 	if err != nil {
 		return err
 	}
@@ -388,8 +394,8 @@ func (handler *Handlers) addTagsToTaskHelper(w http.ResponseWriter, r *http.Requ
 	if err := json.Unmarshal(data, &tags); err != nil {
 		return err
 	}
-	parameters := mux.Vars(r)
-	if err := handler.DataBase.AddTagsToTask(parameters["taskName"], tags); err != nil {
+	query := r.URL.Query()
+	if err := handler.DataBase.AddTagsToTask(query[taskNameField][0], tags); err != nil {
 		return err
 	}
 	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
