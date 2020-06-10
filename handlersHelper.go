@@ -461,3 +461,8 @@ func (handler *Handlers) copyBody(r *http.Request) ([]byte, error) {
 func (handler *Handlers) errorConstructNotFound(err error, name string) error {
 	return errors.New(err.Error() + "'" + name + "' didn't find")
 }
+
+func (handler *Handlers) setDefaultHandlers(w http.ResponseWriter) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, X-Requested-With")
+}
