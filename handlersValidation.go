@@ -12,7 +12,7 @@ func (handler *Handlers) validateSession(r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	if sessionId != getSessionId(userId) {
+	if sessionId != getSecret(userId, secretSessionId) {
 		return invalidSessionError
 	}
 	return nil

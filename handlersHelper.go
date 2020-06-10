@@ -28,11 +28,12 @@ func (handler *Handlers) registrationHelper(w http.ResponseWriter, r *http.Reque
 		return err
 	}
 	userInfo.UserInfo.RegistrationTime = time.Now()
+	userInfo.UserPrivate.Password = getSecret(userInfo.UserPrivate.Password, secretPasswordSalt)
 	if err = handler.DataBase.AddUser(userInfo); err != nil {
 		return err
 	}
 	w.Header().Set(userIdField, userInfo.UserPrivate.UserId)
-	w.Header().Set(sessionIdField, getSessionId(userInfo.UserPrivate.UserId))
+	w.Header().Set(sessionIdField, getSecret(userInfo.UserPrivate.UserId, secretSessionId))
 	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
 		return err
 	}
@@ -48,12 +49,13 @@ func (handler *Handlers) loginHelper(w http.ResponseWriter, r *http.Request) err
 	if err = json.Unmarshal(data, userInfo); err != nil {
 		return err
 	}
+	userInfo.Password = getSecret(userInfo.Password, secretPasswordSalt)
 	userId, err := handler.DataBase.Login(userInfo)
 	if err != nil {
 		return err
 	}
 	w.Header().Set(userIdField, userId)
-	w.Header().Set(sessionIdField, getSessionId(userId))
+	w.Header().Set(sessionIdField, getSecret(userId, secretSessionId))
 	if err := json.NewEncoder(w).Encode(toAnswer(success, nil)); err != nil {
 		return err
 	}

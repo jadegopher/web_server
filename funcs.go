@@ -72,8 +72,8 @@ func parseError(err error) (string, int) {
 	return tmp, num
 }
 
-func getSessionId(id string) string {
+func getSecret(str, salt string) string {
 	h := sha256.New()
-	h.Write([]byte(id + secretSessionId))
+	h.Write([]byte(str + salt))
 	return base64.URLEncoding.EncodeToString(h.Sum(nil))
 }
