@@ -21,8 +21,6 @@ func main() {
 	handlers := NewHandlers(db, config[logField].(bool))
 	staticDir := config[staticDirField].(string)
 
-	go router.PathPrefix(staticDir).Handler(http.StripPrefix(staticDir, http.FileServer(http.Dir("."+staticDir))))
-
 	router.HandleFunc("/registration", handlers.Registration).Methods("POST")
 	router.HandleFunc("/login", handlers.Login).Methods("POST")
 	router.HandleFunc("/profiles/{id}", handlers.GetUserInfo).Methods("GET")
@@ -43,6 +41,8 @@ func main() {
 	router.HandleFunc("/developers/postTag", handlers.PostTag).Methods("POST")
 	router.HandleFunc("/developers/tasks/post", handlers.PostTask).Methods("POST")
 	router.HandleFunc("/developers/tasks/addTags/{taskName}", handlers.AddTagsToTask).Methods("POST")
+
+	go router.PathPrefix(staticDir).Handler(http.StripPrefix(staticDir, http.FileServer(http.Dir("."+staticDir))))
 
 	go func() {
 		if err := http.ListenAndServe(":80", http.HandlerFunc(handlers.redirectTLS)); err != nil {
