@@ -14,6 +14,10 @@ func NewHandlers(db *dataBase.DataBase, log bool) *Handlers {
 	return &Handlers{DataBase: db, Log: log}
 }
 
+func (handler *Handlers) redirectTLS(w http.ResponseWriter, r *http.Request) {
+	http.Redirect(w, r, "https://"+r.Host+r.RequestURI, http.StatusMovedPermanently)
+}
+
 func (handler *Handlers) Registration(w http.ResponseWriter, r *http.Request) {
 	var err error
 	if err = handler.registrationHelper(w, r); err != nil {

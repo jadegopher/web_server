@@ -44,8 +44,15 @@ func main() {
 	router.HandleFunc("/developers/tasks/post", handlers.PostTask).Methods("POST")
 	router.HandleFunc("/developers/tasks/addTags/{taskName}", handlers.AddTagsToTask).Methods("POST")
 
+	go func() {
+		if err := http.ListenAndServe(":80", http.HandlerFunc(handlers.redirectTLS)); err != nil {
+			log.Fatalf("ListenAndServe error: %v", err)
+		}
+	}()
+
 	err = http.ListenAndServeTLS(":443", config[certFilePathField].(string), config[keyFilePathField].(string), router)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
+
 	}
 }
