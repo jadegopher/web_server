@@ -259,6 +259,7 @@ func (db *DataBase) findQuestWhereOpponent(userId string, questId int, status St
 	if err != nil {
 		return nil, err
 	}
+	defer result.Close()
 	if !result.Next() {
 		return nil, QuestNotFoundError
 	}
@@ -275,6 +276,7 @@ func (db *DataBase) findQuestWhereInitiator(userId string, questId int, status S
 	if err != nil {
 		return nil, err
 	}
+	defer result.Close()
 	if !result.Next() {
 		return nil, QuestNotFoundError
 	}
@@ -370,6 +372,7 @@ func (db *DataBase) getRandomTask() (*entities.Task, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer result.Close()
 	ret := &entities.Task{}
 	if result.Next() {
 		ret, err = db.getTaskInfo(result)

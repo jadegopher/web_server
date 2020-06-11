@@ -68,6 +68,7 @@ func (db *DataBase) Login(private *entities.Login) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer result.Close()
 	ret := &entities.UserPrivate{}
 	if result.Next() {
 		if err := result.Scan(&ret.UserId, &ret.Email, &ret.Password); err != nil {
@@ -91,11 +92,13 @@ func (db *DataBase) GetUserInfo(id string, self bool) (*entities.UserInfo, error
 		if err != nil {
 			return nil, err
 		}
+		defer result.Close()
 	} else {
 		result, err = db.Connection.Query("SELECT * FROM user_info WHERE user_id = $1 AND private = 0", id)
 		if err != nil {
 			return nil, err
 		}
+		defer result.Close()
 	}
 	var ret *entities.UserInfo
 	if result.Next() {
@@ -119,6 +122,7 @@ func (db *DataBase) SearchUser(userId, query, from, count string) ([]entities.Us
 	if err != nil {
 		return nil, err
 	}
+	defer result.Close()
 	ret := make([]entities.UserInfo, 0)
 	for result.Next() {
 		elem, err := db.getUserInfo(result)
@@ -142,6 +146,7 @@ func (db *DataBase) GetTags(from, count string) ([]entities.Tag, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer result.Close()
 	tags := make([]entities.Tag, 0)
 	for result.Next() {
 		tmp := entities.Tag{}
@@ -189,6 +194,9 @@ func (db *DataBase) AddTagsToUser(userId string, tags []entities.Tag) error {
 			userId, value.Name, 5); err != nil {
 			return err
 		}
+		if err := result.Close(); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -201,11 +209,13 @@ func (db *DataBase) GetUserTags(userId string, self bool) ([]entities.IdTags, er
 		if err != nil {
 			return nil, err
 		}
+		defer result.Close()
 	} else {
 		result, err = db.Connection.Query("SELECT * FROM user_info WHERE user_id = $1 AND private = 0", userId)
 		if err != nil {
 			return nil, err
 		}
+		defer result.Close()
 	}
 	if !result.Next() {
 		return nil, UserNotFoundError
@@ -214,6 +224,7 @@ func (db *DataBase) GetUserTags(userId string, self bool) ([]entities.IdTags, er
 	if err != nil {
 		return nil, err
 	}
+	defer result.Close()
 	userTags, err := db.getTagsList(result)
 	if err != nil {
 		return nil, err
@@ -226,6 +237,7 @@ func (db *DataBase) GetTaskInfo(taskName string) (*entities.Task, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer result.Close()
 	ret := &entities.Task{}
 	if result.Next() {
 		ret, err = db.getTaskInfo(result)
@@ -243,6 +255,7 @@ func (db *DataBase) GetTaskTags(taskName string) ([]entities.IdTags, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer result.Close()
 	if !result.Next() {
 		return nil, db.errorConstructNotFound(TaskNotFoundError, taskName)
 	}
@@ -250,6 +263,7 @@ func (db *DataBase) GetTaskTags(taskName string) ([]entities.IdTags, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer result.Close()
 	taskTags, err := db.getTagsList(result)
 	if err != nil {
 		return nil, err
@@ -282,6 +296,7 @@ func (db *DataBase) InviteUser(user, userOpponent string) error {
 	if err != nil {
 		return err
 	}
+	defer result.Close()
 	if result.Next() {
 		return InviteExistsError
 	}
@@ -298,6 +313,7 @@ func (db *DataBase) GetTasks(userId string, status Status) ([]entities.Quest, er
 	if err != nil {
 		return nil, err
 	}
+	defer result.Close()
 	invites, err := db.getQuestsList(result)
 	if err != nil {
 		return nil, err
@@ -314,12 +330,14 @@ func (db *DataBase) GetQuests(userId, status string) ([]entities.Quest, error) {
 		if err != nil {
 			return nil, err
 		}
+		defer result.Close()
 	} else {
 		result, err = db.Connection.Query(`SELECT * FROM quests WHERE 
 		user_id = $1 AND status = $2`, userId, status)
 		if err != nil {
 			return nil, err
 		}
+		defer result.Close()
 	}
 	invites, err := db.getQuestsList(result)
 	if err != nil {
@@ -376,6 +394,7 @@ func (db *DataBase) CheckDeveloper(userId string) error {
 	if err != nil {
 		return err
 	}
+	defer result.Close()
 	if !result.Next() {
 		return UserNotFoundError
 	}
@@ -436,6 +455,9 @@ func (db *DataBase) AddTagsToTask(taskName string, tags []entities.Tag) error {
 		}
 		if err := db.append("INSERT INTO task_tags VALUES($1, $2, $3)",
 			taskName, value.Name, 5); err != nil {
+			return err
+		}
+		if err := result.Close(); err != nil {
 			return err
 		}
 	}
